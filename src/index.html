@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Fiep SENAI - Agendar</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap" rel="stylesheet">
+</head>
+<body class="left-scrollbar-simulacao">
+
+    <header class="navbar">
+        <div class="logo-container">
+            <img src="./img/logo-senai.png" alt="Logo SENAI" class="logo-senai"> 
+        </div>
+      
+        <nav class="main-nav">
+          <a href="#" class="nav-item">Usados</a>
+          <a href="#" class="nav-item active">Agendar</a> <a href="#" class="nav-item">Pendentes</a>
+          <a href="#" class="nav-item">Relatórios</a>
+        </nav>
+      
+        <div class="user-actions">
+          <i class="fas fa-user-circle"></i>
+          <i class="fas fa-sign-out-alt"></i>
+        </div>
+    </header>
+
+    <main class="content-container">
+        <div class="schedule-layout">
+            
+            <aside id="product-sidebar" class="product-selection-sidebar empty-state">
+                
+                <button id="open-cadastro-modal" class="create-product-card">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="create-text">Criar Produto</span>
+                    <span class="create-tip">Cadastre um novo equipamento para agendar.</span>
+                </button>
+
+                <div id="product-list" class="product-list" style="display: none;">
+                    </div>
+
+            </aside>
+
+            <div class="calendar-area">
+                <h2 class="month-title">Setembro 2025</h2>
+                <div class="calendar-grid">
+                    </div>
+
+                <div class="calendar-actions"> 
+                </div>
+                <h2 class="month-title">Setembro 2025</h2>
+                <div class="calendar-grid">
+                    <div class="day-header">Domingo</div><div class="day-header">Segunda-Feira</div><div class="day-header">Terça-Feira</div><div class="day-header">Quarta-Feira</div><div class="day-header">Quinta-Feira</div><div class="day-header">Sexta-Feira</div><div class="day-header">Sábado</div>
+
+                    <div class="calendar-day prev-month">31</div>
+                    <div class="calendar-day">1</div><div class="calendar-day">2</div><div class="calendar-day">3</div><div class="calendar-day">4</div><div class="calendar-day">5</div><div class="calendar-day">6</div>
+                    <div class="calendar-day">7</div><div class="calendar-day">8</div><div class="calendar-day">9</div><div class="calendar-day">10</div><div class="calendar-day">11</div><div class="calendar-day">12</div><div class="calendar-day">13</div>
+                    <div class="calendar-day">14</div><div class="calendar-day">15</div><div class="calendar-day">16</div><div class="calendar-day">17</div><div class="calendar-day">18</div><div class="calendar-day">19</div><div class="calendar-day">20</div>
+                    <div class="calendar-day">21</div><div class="calendar-day">22</div><div class="calendar-day">23</div><div class="calendar-day">24</div><div class="calendar-day">25</div><div class="calendar-day">26</div><div class="calendar-day">27</div>
+                    <div class="calendar-day">28</div><div class="calendar-day">29</div><div class="calendar-day">30</div>
+                    <div class="calendar-day next-month">1</div><div class="calendar-day next-month">2</div><div class="calendar-day next-month">3</div><div class="calendar-day next-month">4</div>
+                </div>
+                <button class="confirm-btn" disabled>Confirmar</button>
+                
+            </div>
+        </div>
+
+        <div id="cadastro-modal" class="modal-overlay">
+            <div class="modal-content cadastro-content">
+                <h3>Cadastro de Equipamento</h3>
+                
+                <form id="cadastro-form" enctype="multipart/form-data">
+                    
+                    <div class="form-group">
+                        <label for="fornecedor">Fornecedor:</label>
+                        <input type="text" id="fornecedor" name="fornecedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nomeEquipamento">Nome do Equipamento:</label>
+                        <input type="text" id="nomeEquipamento" name="nomeEquipamento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricao">Descrição:</label>
+                        <textarea id="descricao" name="descricao" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="imagemEquipamento">Imagem do Equipamento:</label>
+                        <input type="file" id="imagemEquipamento" name="imagemEquipamento" accept="image/*" required>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="altoValor" name="altoValor">
+                        <label for="altoValor">Equipamento de Alto Valor (AltoValor):</label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="close-cadastro-modal">Cancelar</button>
+                        <button type="submit" class="confirm-modal-btn">Cadastrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="agendamento-modal" class="modal-overlay">
+            <div class="modal-content confirmation-content">
+                <h3>Confirmar Agendamento</h3>
+                <form id="agendamento-form">
+                    <p>Você está agendando o equipamento <strong><span id="modal-equipamento-nome" style="color: var(--dark-blue);"></span></strong> para retirada no dia <strong><span id="modal-data-retirada" style="color: var(--dark-blue);"></span></strong>.</p>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="nomeSolicitante">Nome do Solicitante:</label>
+                        <input type="text" id="nomeSolicitante" name="nomeSolicitante" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="horarioAgendamento">Horário de Retirada (no dia <span id="modal-data-retirada-horario-label"></span>):</label>
+                        <input type="time" id="horarioAgendamento" name="horarioAgendamento" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dataDevolucao">Data de Devolução:</label>
+                        <input type="date" id="dataDevolucao" name="dataDevolucao" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="horarioDevolucao">Horário de Devolução:</label>
+                        <input type="time" id="horarioDevolucao" name="horarioDevolucao" required>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="close-agendamento-modal">Cancelar</button>
+                        <button type="submit" class="confirm-modal-btn">Confirmar Agendamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </main>
+    
+    <script src="script.js"></script> 
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Fiep SENAI - Agendar</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap" rel="stylesheet">
+</head>
+<body class="left-scrollbar-simulacao">
+
+    <header class="navbar">
+        <div class="logo-container">
+            <img src="./img/logo-senai.png" alt="Logo SENAI" class="logo-senai"> 
+        </div>
+      
+        <nav class="main-nav">
+          <a href="#" class="nav-item">Usados</a>
+          <a href="#" class="nav-item active">Agendar</a> <a href="#" class="nav-item">Pendentes</a>
+          <a href="#" class="nav-item">Relatórios</a>
+        </nav>
+      
+        <div class="user-actions">
+          <i class="fas fa-user-circle"></i>
+          <i class="fas fa-sign-out-alt"></i>
+        </div>
+    </header>
+
+    <main class="content-container">
+        <div class="schedule-layout">
+            
+            <aside id="product-sidebar" class="product-selection-sidebar empty-state">
+                
+                <button id="open-cadastro-modal" class="create-product-card">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="create-text">Criar Produto</span>
+                    <span class="create-tip">Cadastre um novo equipamento para agendar.</span>
+                </button>
+
+                <div id="product-list" class="product-list" style="display: none;">
+                    </div>
+
+            </aside>
+
+            <div class="calendar-area">
+                <h2 class="month-title">Setembro 2025</h2>
+                <div class="calendar-grid">
+                    </div>
+
+                <div class="calendar-actions"> 
+                </div>
+                <h2 class="month-title">Setembro 2025</h2>
+                <div class="calendar-grid">
+                    <div class="day-header">Domingo</div><div class="day-header">Segunda-Feira</div><div class="day-header">Terça-Feira</div><div class="day-header">Quarta-Feira</div><div class="day-header">Quinta-Feira</div><div class="day-header">Sexta-Feira</div><div class="day-header">Sábado</div>
+
+                    <div class="calendar-day prev-month">31</div>
+                    <div class="calendar-day">1</div><div class="calendar-day">2</div><div class="calendar-day">3</div><div class="calendar-day">4</div><div class="calendar-day">5</div><div class="calendar-day">6</div>
+                    <div class="calendar-day">7</div><div class="calendar-day">8</div><div class="calendar-day">9</div><div class="calendar-day">10</div><div class="calendar-day">11</div><div class="calendar-day">12</div><div class="calendar-day">13</div>
+                    <div class="calendar-day">14</div><div class="calendar-day">15</div><div class="calendar-day">16</div><div class="calendar-day">17</div><div class="calendar-day">18</div><div class="calendar-day">19</div><div class="calendar-day">20</div>
+                    <div class="calendar-day">21</div><div class="calendar-day">22</div><div class="calendar-day">23</div><div class="calendar-day">24</div><div class="calendar-day">25</div><div class="calendar-day">26</div><div class="calendar-day">27</div>
+                    <div class="calendar-day">28</div><div class="calendar-day">29</div><div class="calendar-day">30</div>
+                    <div class="calendar-day next-month">1</div><div class="calendar-day next-month">2</div><div class="calendar-day next-month">3</div><div class="calendar-day next-month">4</div>
+                </div>
+                <button class="confirm-btn" disabled>Confirmar</button>
+                
+            </div>
+        </div>
+
+        <div id="cadastro-modal" class="modal-overlay">
+            <div class="modal-content cadastro-content">
+                <h3>Cadastro de Equipamento</h3>
+                
+                <form id="cadastro-form" enctype="multipart/form-data">
+                    
+                    <div class="form-group">
+                        <label for="fornecedor">Fornecedor:</label>
+                        <input type="text" id="fornecedor" name="fornecedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nomeEquipamento">Nome do Equipamento:</label>
+                        <input type="text" id="nomeEquipamento" name="nomeEquipamento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricao">Descrição:</label>
+                        <textarea id="descricao" name="descricao" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="imagemEquipamento">Imagem do Equipamento:</label>
+                        <input type="file" id="imagemEquipamento" name="imagemEquipamento" accept="image/*" required>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="altoValor" name="altoValor">
+                        <label for="altoValor">Equipamento de Alto Valor (AltoValor):</label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="close-cadastro-modal">Cancelar</button>
+                        <button type="submit" class="confirm-modal-btn">Cadastrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="agendamento-modal" class="modal-overlay">
+            <div class="modal-content confirmation-content">
+                <h3>Confirmar Agendamento</h3>
+                <form id="agendamento-form">
+                    <p>Você está agendando o equipamento <strong><span id="modal-equipamento-nome" style="color: var(--dark-blue);"></span></strong> para retirada no dia <strong><span id="modal-data-retirada" style="color: var(--dark-blue);"></span></strong>.</p>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="nomeSolicitante">Nome do Solicitante:</label>
+                        <input type="text" id="nomeSolicitante" name="nomeSolicitante" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="horarioAgendamento">Horário de Retirada (no dia <span id="modal-data-retirada-horario-label"></span>):</label>
+                        <input type="time" id="horarioAgendamento" name="horarioAgendamento" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dataDevolucao">Data de Devolução:</label>
+                        <input type="date" id="dataDevolucao" name="dataDevolucao" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="horarioDevolucao">Horário de Devolução:</label>
+                        <input type="time" id="horarioDevolucao" name="horarioDevolucao" required>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="close-agendamento-modal">Cancelar</button>
+                        <button type="submit" class="confirm-modal-btn">Confirmar Agendamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </main>
+    
+    <script src="script.js"></script> 
+</body>
+</html>

@@ -1,0 +1,749 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap');
+
+:root {
+    /* Azul institucional (principal SENAI/FIEP) */
+    --main-blue: #16429F;    /* R:25 G:66 B:159 — cor principal */
+    --dark-blue: #112E73;    /* R:17 G:46 B:115 — azul mais escuro */
+    --medium-blue: #226FC0;  /* R:34 G:111 B:192 — azul médio */
+    --light-blue: #2CA0E9;   /* R:44 G:160 B:233 — azul claro */
+
+    /* Cores de apoio */
+    --white: #ffffff;
+    --gray-bg: #F3F5F8;
+    --gray-card: #E8ECF3;
+    --text-dark: #1B1B1B;
+    --border-gray: #C4C4C4;
+
+    /* Sombra e destaque */
+    --shadow-light: rgba(0, 0, 0, 0.05);
+    --shadow-hover: rgba(0, 0, 0, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Open Sans', sans-serif;
+}
+
+body {
+    background-color: var(--gray-bg);
+    color: var(--text-dark);
+}
+
+   .navbar {
+    display: flex;
+    align-items: center;
+    background-color: var(--dark-blue);
+    padding: 12px 30px;
+    color: var(--white);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 6px var(--shadow-light);
+
+    justify-content: space-between;
+}
+
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+
+    margin-right: 20px;
+}
+
+.sistema-fiep {
+    font-size: 0.8em;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+
+.senai {
+    font-size: 1.6em;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.main-nav {
+    display: flex;
+    flex-grow: 1; 
+    justify-content: center; 
+
+    gap: 40px;
+}
+
+.nav-item {
+    color: var(--white);
+    text-decoration: none;
+    padding: 10px 25px;
+    background-color: transparent;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease-in-out;
+
+    font-size: 1.1em;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+
+.nav-item:hover {
+    background-color: var(--medium-blue);
+}
+
+.nav-item.active {
+    background-color: var(--main-blue);
+    border-bottom-color: var(--light-blue);
+    font-weight: 700;
+
+    letter-spacing: 0.5px; 
+}
+
+.user-actions i {
+    font-size: 1.5em;
+    margin-left: 25px;
+    cursor: pointer;
+}
+
+.content-container {
+    padding: 20px;
+    max-width: 1350px;
+    margin: 0 auto;
+}
+
+.search-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 25px;
+}
+
+.search-bar-top {
+    display: flex;
+    align-items: center;
+    width: 380px;
+    border: 1px solid var(--border-gray);
+    border-radius: 50px; /* 🔹 arredondado */
+    background-color: var(--white);
+    overflow: hidden;
+    box-shadow: 0 2px 6px var(--shadow-light);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.search-bar-top:hover {
+    box-shadow: 0 4px 10px var(--shadow-hover);
+}
+
+.search-bar-top input {
+    border: none;
+    padding: 10px 18px;
+    flex-grow: 1;
+    outline: none;
+    font-size: 1em;
+    font-weight: 300;
+    color: var(--text-dark);
+    border-radius: 50px 0 0 50px; /* 🔹 arredonda o lado esquerdo */
+}
+
+.search-bar-top button {
+    background-color: var(--main-blue);
+    color: var(--white);
+    border: none;
+    padding: 10px 18px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background 0.2s ease;
+    border-radius: 0 50px 50px 0; /* 🔹 arredonda o lado direito */
+}
+
+.search-bar-top button:hover {
+    background-color: var(--light-blue);
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.product-card {
+    background-color: var(--gray-card);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 280px;
+    box-shadow: 0 1px 4px var(--shadow-light);
+    transition: box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+    box-shadow: 0 3px 10px var(--shadow-hover);
+}
+
+.product-name {
+    font-size: 0.95em;
+    color: var(--dark-blue);
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.product-image {
+    width: 80%;
+    height: 140px;
+    object-fit: contain;
+    background: var(--white);
+    padding: 10px;
+    margin: 0 auto;
+    border-radius: 4px;
+}
+
+.product-meta {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-gray);
+    margin-top: 10px;
+}
+
+.user-name {
+    font-weight: 700;
+    color: var(--dark-blue);
+}
+
+.days-indicator {
+    background-color: var(--main-blue);
+    color: var(--white);
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    box-shadow: 0 1px 2px var(--shadow-light);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--medium-blue);
+    border-radius: 5px;
+}
+
+.logo-senai {
+    height: 55px;
+    object-fit: contain;
+    display: block;
+}
+
+.product-selection-sidebar.empty-state {
+    /* Centraliza o conteúdo (o botão) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 600px; /* Mantém a altura para centralizar bem */
+    padding: 20px;
+}
+
+.create-product-card {
+    background-color: var(--white);
+    border: 2px dashed var(--medium-blue);
+    border-radius: 8px;
+    padding: 30px;
+    width: 100%;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.create-product-card:hover {
+    background-color: var(--gray-card); /* Cor clara no hover */
+    border-color: var(--main-blue);
+}
+
+.create-product-card .fas {
+    color: var(--medium-blue);
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.create-text {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.create-tip {
+    font-size: 0.8em;
+    font-weight: 300;
+    color: #666;
+    margin-top: 5px;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente escuro */
+    z-index: 2000; /* Garante que fique acima de tudo */
+    display: none; /* Inicia oculto */
+    align-items: center; /* Centraliza verticalmente */
+    justify-content: center; /* Centraliza horizontalmente */
+}
+
+.modal-overlay.visible {
+    display: flex;
+}
+
+
+.modal-content.confirmation-content {
+    /* Largura menor para o modal de confirmação de AGENDAMENTO */
+    max-width: 450px; 
+    padding: 30px;
+}
+.modal-content.confirmation-content h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--main-blue);
+}
+
+.modal-content.cadastro-content {
+    width: 600px; /* Largura para o modal de CADASTRO */
+    padding: 40px;
+}
+
+.cadastro-content .form-group,
+.confirmation-content .form-group {
+    display: block; 
+    margin-bottom: 20px;
+}
+
+.cadastro-content label,
+.confirmation-content label {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 5px;
+    color: var(--dark-blue);
+}
+
+.cadastro-content input[type="text"],
+.cadastro-content textarea,
+.cadastro-content input[type="file"],
+.confirmation-content input[type="text"],
+.confirmation-content input[type="date"],
+.confirmation-content input[type="time"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.cadastro-content textarea {
+    resize: vertical;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-top: 25px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    transform: scale(1.3);
+}
+
+.checkbox-group label {
+    font-weight: 300;
+    display: inline;
+}
+
+.cadastro-content .modal-actions {
+    margin-top: 40px;
+}
+
+.schedule-layout {
+    display: flex;
+    gap: 30px;
+}
+
+/* ALTERAÇÃO: Aumenta a largura da sidebar para acomodar mais detalhes */
+.product-selection-sidebar {
+    width: 380px; 
+    flex-shrink: 0;
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 6px var(--shadow-light);
+}
+
+.calendar-area {
+    flex-grow: 1;
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 6px var(--shadow-light);
+}
+
+.month-title {
+    color: var(--dark-blue);
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.8em;
+}
+
+.calendar-grid {
+    /* 🛑 ESTA É A CHAVE DA CORREÇÃO: Usa Grid Layout */
+    display: grid; 
+    /* Define 7 colunas de largura igual para os 7 dias da semana */
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 1px;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    overflow: hidden; /* Garante que as bordas fiquem limpas */
+}
+
+.day-header {
+    background-color: var(--gray-card);
+    color: var(--dark-blue);
+    font-weight: 700;
+    padding: 10px 5px;
+    text-align: center;
+    font-size: 0.9em;
+    border-right: 1px solid var(--border-gray);
+}
+.day-header:last-child {
+    border-right: none;
+}
+
+.calendar-day {
+    background-color: var(--white);
+    height: 90px;
+    padding: 8px;
+    border-top: 1px solid var(--border-gray);
+    border-right: 1px solid var(--border-gray);
+    font-size: 1.2em;
+    color: var(--text-dark);
+    text-align: right;
+}
+.calendar-day:nth-child(7n) { /* Remove a borda direita do último dia da semana (Sábado) */
+    border-right: none;
+}
+
+.calendar-day.prev-month,
+.calendar-day.next-month {
+    color: var(--border-gray);
+    background-color: var(--gray-bg);
+}
+
+.confirm-btn {
+    display: block;
+    width: 250px;
+    margin: 25px auto 0;
+    padding: 12px 20px;
+    background-color: var(--main-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirm-btn:disabled {
+    background-color: var(--border-gray);
+    cursor: not-allowed;
+}
+
+.confirm-btn:not([disabled]) {
+    background-color: var(--main-blue); /* Cor principal quando ativo */
+    color: var(--white);
+    opacity: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 8px var(--shadow-light);
+}
+
+.confirm-btn:not([disabled]):hover {
+    background-color: var(--dark-blue); /* Azul mais escuro no hover */
+}
+
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 560px; /* Ajuste para caber bem na sidebar */
+    overflow-y: auto;
+    padding-right: 5px; /* Espaço para a barra de rolagem não cortar o conteúdo */
+}
+
+.product-selection-sidebar:not(.empty-state) {
+    /* Remove a centralização de item único */
+    display: block;
+    height: auto; 
+    padding: 20px;
+}
+
+.product-item-card {
+    background-color: var(--gray-card);
+    border-radius: 6px;
+    padding: 15px 10px 40px 10px; /* Aumenta o padding inferior para caber o botão */
+    display: flex;
+    align-items: flex-start; /* Alinha no topo para dar mais espaço */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent; 
+    position: relative; /* Necessário para posicionar o botão */
+}
+
+.product-item-card:hover {
+    background-color: #e0e4eb; 
+}
+
+.product-item-card.selected {
+    border-color: var(--main-blue);
+    background-color: #dbe4f0; 
+    box-shadow: 0 1px 6px var(--shadow-hover);
+}
+
+.product-item-image-container {
+    flex-shrink: 0;
+    width: 70px; /* Levemente maior */
+    height: 70px; /* Levemente maior */
+    margin-right: 15px;
+    background-color: var(--white);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-gray);
+}
+
+.product-item-image {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+.product-item-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    /* Ajusta a largura para caber a imagem e o status */
+    max-width: calc(100% - 70px - 70px); 
+}
+
+.product-item-name {
+    font-size: 1.0em; 
+    font-weight: 700;
+    color: var(--dark-blue);
+    margin-bottom: 4px;
+}
+
+.product-item-meta {
+    font-size: 0.85em;
+    color: var(--text-dark);
+    font-weight: 300;
+}
+
+.product-item-description {
+    font-size: 0.8em; /* Aumenta a fonte */
+    color: #444; /* Cor um pouco mais escura */
+    font-weight: 300;
+    margin-top: 8px;
+    /* Limita o texto a 3 linhas */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.product-item-status {
+    flex-shrink: 0;
+    margin-left: 10px;
+    font-size: 0.8em; /* Aumenta a fonte */
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: var(--white);
+    background-color: var(--medium-blue);
+}
+
+.select-button {
+    position: absolute; /* Posição absoluta dentro do card */
+    right: 10px;
+    bottom: 10px; /* Canto inferior direito */
+    background-color: var(--main-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 0.85em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    z-index: 5; /* Garante que ele fique acima de outros elementos do card */
+}
+
+.select-button:hover {
+    background-color: var(--light-blue);
+}
+
+.product-item-card.selected .select-button {
+    background-color: var(--dark-blue);
+}
+
+.product-selection-sidebar:not(.empty-state) .create-product-card {
+    display: none;
+}
+
+.cadastro-content .modal-actions button,
+.confirmation-content .modal-actions button {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    min-width: 120px; /* Garante que os botões tenham um tamanho mínimo */
+}
+
+.confirm-modal-btn {
+    background-color: var(--main-blue); 
+    color: var(--white);
+    border: 1px solid var(--main-blue);
+    margin-left: 15px; 
+}
+.confirm-modal-btn:hover {
+    background-color: var(--light-blue);
+    border-color: var(--light-blue);
+    box-shadow: 0 2px 6px var(--shadow-hover);
+}
+
+.cancel-btn {
+    background-color: var(--white); 
+    color: var(--dark-blue); 
+    border: 1px solid var(--dark-blue); 
+}
+.cancel-btn:hover {
+    background-color: var(--gray-card); 
+    color: var(--main-blue);
+    border-color: var(--main-blue);
+    box-shadow: 0 1px 4px var(--shadow-light);
+}
+
+.modal-content {
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative; 
+}
+
+.modal-content.confirmation-content {
+    /* Largura menor para o modal de confirmação de AGENDAMENTO */
+    max-width: 450px; 
+    padding: 30px;
+}
+.modal-content.confirmation-content h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--main-blue);
+}
+
+.modal-content.cadastro-content {
+    width: 600px; /* Largura para o modal de CADASTRO */
+    padding: 40px;
+}
+
+.cadastro-content .form-group,
+.confirmation-content .form-group {
+    display: block; 
+    margin-bottom: 20px;
+}
+
+.cadastro-content label,
+.confirmation-content label {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 5px;
+    color: var(--dark-blue);
+}
+
+.cadastro-content input[type="text"],
+.cadastro-content textarea,
+.cadastro-content input[type="file"],
+.confirmation-content input[type="text"],
+.confirmation-content input[type="date"],
+.confirmation-content input[type="time"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+/* Garante que os botões fiquem alinhados à direita */
+.cadastro-content .modal-actions,
+.confirmation-content .modal-actions {
+    display: flex;
+    justify-content: flex-end; /* Alinha os botões à direita */
+    margin-top: 40px;
+}
+
+.calendar-day.selected-day {
+    /* Cor de Fundo do dia selecionado */
+    background-color: var(--main-blue); 
+    color: var(--white); /* Cor do texto */
+    font-weight: 700;
+    /* Destaque visual: Sombra ou Borda */
+    box-shadow: inset 0 0 0 3px var(--light-blue);
+    border: 1px solid var(--dark-blue) !important;
+}
+
+/* Garante que o número do dia selecionado se destaque */
+.calendar-day.selected-day .day-number {
+    color: var(--white);
+}
+
+/* Garante que o cursor mude */
+.calendar-day {
+    cursor: pointer;
+    /* Adiciona uma transição suave ao clicar */
+    transition: background-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.calendar-day:hover {
+    background-color: var(--gray-card);
+}
+
+.calendar-day.prev-month:hover,
+.calendar-day.next-month:hover {
+    /* Não muda a cor de fundo dos dias de outros meses no hover */
+    background-color: var(--gray-bg);
+    cursor: not-allowed;
+}
+
+/* O número do dia em si (se estiver em um span para data real) */
+.day-number {
+    /* Se o seu dia for apenas o texto dentro do div, ignore isso */
+    font-weight: 700;
+}
+
+.calendar-actions {
+    text-align: center; /* Centraliza o botão */
+    margin-top: 25px;
+}
