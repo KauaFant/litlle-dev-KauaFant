@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap');
 
+html, body {
+    height: 100%;
+    /* Garante que a altura da página seja igual à altura da viewport */
+}
 :root {
     /* Azul institucional (principal SENAI/FIEP) */
     --main-blue: #16429F;    /* R:25 G:66 B:159 — cor principal */
@@ -292,32 +296,15 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente escuro */
-    z-index: 2000; /* Garante que fique acima de tudo */
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 2000; 
     display: none; /* Inicia oculto */
-    align-items: center; /* Centraliza verticalmente */
-    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* <<< VERTICALMENTE */
+    justify-content: center; /* <<< HORIZONTALMENTE */
 }
 
 .modal-overlay.visible {
-    display: flex;
-}
-
-
-.modal-content.confirmation-content {
-    /* Largura menor para o modal de confirmação de AGENDAMENTO */
-    max-width: 450px; 
-    padding: 30px;
-}
-.modal-content.confirmation-content h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: var(--main-blue);
-}
-
-.modal-content.cadastro-content {
-    width: 600px; /* Largura para o modal de CADASTRO */
-    padding: 40px;
+    display: flex; /* <<< ATIVA O FLEX PARA CENTRALIZAR */
 }
 
 .cadastro-content .form-group,
@@ -606,8 +593,9 @@ body {
     background-color: var(--dark-blue);
 }
 
-.product-selection-sidebar:not(.empty-state) .create-product-card {
-    display: none;
+/* O botão "Adicionar Equipamento" sempre visível */
+.create-product-card {
+    margin-bottom: 20px;
 }
 
 .cadastro-content .modal-actions button,
@@ -649,7 +637,6 @@ body {
     background-color: var(--white);
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    position: relative; 
 }
 
 .modal-content.confirmation-content {
@@ -746,4 +733,94 @@ body {
 .calendar-actions {
     text-align: center; /* Centraliza o botão */
     margin-top: 25px;
+}
+
+/* Controle de Visibilidade das Seções */
+.content-section.hidden {
+    display: none;
+}
+
+.content-section.visible {
+    display: block;
+}
+
+/* Título da nova tela */
+#used-content h2 {
+    color: var(--dark-blue);
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+#used-content .search-section {
+    /* Mantenha a barra de pesquisa alinhada à direita se desejar */
+    justify-content: flex-end; 
+}
+
+/* Estilização específica para o card de Histórico/Usado */
+.product-card.used-card {
+    height: 320px; /* Aumenta um pouco para caber 4 linhas */
+    padding: 20px;
+    background-color: var(--white); /* Fundo branco para diferenciar */
+    border: 1px solid var(--border-gray);
+}
+
+.product-card.used-card .product-meta {
+    padding-top: 5px;
+    margin-top: 5px;
+    border-top: none; /* Remove a linha divisória */
+    flex-direction: column; /* Coloca os spans um abaixo do outro */
+    align-items: flex-start;
+}
+
+.product-card.used-card .days-indicator {
+    display: block; /* Ocupa a largura total na coluna */
+    margin-top: 5px;
+    padding: 8px 12px;
+}
+
+.product-card.used-card .product-name {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.hidden {
+    display: none !important;
+}
+.visible {
+    display: block !important;
+}
+#cadastro-modal .modal-content.cadastro-content {
+    position: relative; /* mantém a hierarquia flex normal */
+    top: auto;
+    left: auto;
+    transform: none; /* remove possíveis deslocamentos antigos */
+}
+
+/* Garante centralização perfeita na tela */
+#cadastro-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Quando visível */
+#cadastro-modal.visible {
+    display: flex;
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 650px) {
+    #cadastro-modal .modal-content.cadastro-content {
+        width: 90%;
+        padding: 20px;
+    }
 }

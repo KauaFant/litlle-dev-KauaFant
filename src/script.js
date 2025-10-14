@@ -11,6 +11,7 @@ document.getElementById('open-cadastro-modal').addEventListener('click', () => {
 
 document.getElementById('close-cadastro-modal').addEventListener('click', () => {
     document.getElementById('cadastro-modal').classList.remove('visible');
+    document.getElementById('cadastro-form').reset(); // ADICIONADO: Limpa o formulário e fecha o modal
 });
 
 // Lógica para envio do formulário de cadastro de equipamento
@@ -33,6 +34,7 @@ document.getElementById('cadastro-form').addEventListener('submit', async (e) =>
         if(result.success) {
             alert('Equipamento cadastrado com sucesso! A lista será atualizada.');
             document.getElementById('cadastro-modal').classList.remove('visible');
+            form.reset(); // ADICIONADO: Limpa o formulário após o sucesso
             // Chama a função para carregar a lista APÓS o cadastro
             loadProducts(); 
         } else {
