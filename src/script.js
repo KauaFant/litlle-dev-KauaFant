@@ -225,7 +225,7 @@ function openAgendamentoModal() {
     document.getElementById('modal-equipamento-nome').textContent = equipamentoNome;
     document.getElementById('modal-data-retirada').textContent = selectedDate;
     // Preenche o dia no label de horário de retirada
-    document.getElementById('modal-data-retirada-horario-label').textContent = selectedDate; 
+    document.getElementById('modal-data-retirada').textContent = selectedDate; 
 
     // 2. Exibe o modal
     agendamentoModal.classList.add('visible');

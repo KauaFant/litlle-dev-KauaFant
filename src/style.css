@@ -291,20 +291,20 @@ body {
 }
 
 .modal-overlay {
+    display: none; /* ESCONDE POR PADRÃO */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); 
-    z-index: 2000; 
-    display: none; /* Inicia oculto */
-    align-items: center; /* <<< VERTICALMENTE */
-    justify-content: center; /* <<< HORIZONTALMENTE */
+    background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente */
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-overlay.visible {
-    display: flex; /* <<< ATIVA O FLEX PARA CENTRALIZAR */
+    display: flex; /* OU block, dependendo do design, mas 'flex' é ideal para centralizar */
 }
 
 .cadastro-content .form-group,
@@ -635,8 +635,11 @@ body {
 
 .modal-content {
     background-color: var(--white);
+    padding: 30px;
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px var(--shadow-hover);
+    max-width: 500px;
+    width: 90%;
 }
 
 .modal-content.confirmation-content {
@@ -798,23 +801,24 @@ body {
 
 /* Garante centralização perfeita na tela */
 #cadastro-modal {
-    display: none;
+    /* O display: none é definido na classe .modal-overlay, mas é REFORÇADO aqui para corrigir a visibilidade inicial. */
+    display: none; 
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-
-    display: flex;
+    z-index: 9999; /* Alto z-index para sobrepor tudo */
+    
+    /* Garante que o flexbox para centralização esteja configurado */
     justify-content: center;
     align-items: center;
 }
 
-/* Quando visível */
 #cadastro-modal.visible {
-    display: flex;
+    /* FORÇA o display: flex para corrigir a centralização e a visibilidade */
+    display: flex !important;
 }
 
 /* Ajuste para telas menores */
@@ -823,4 +827,10 @@ body {
         width: 90%;
         padding: 20px;
     }
+}
+
+.agendamento-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
