@@ -328,3 +328,113 @@ agendamentoForm.addEventListener('submit', async (e) => {
         alert('Erro de conexão ao tentar agendar.');
     }
 });
+// ==========================================================
+// 4. LÓGICA DE NAVEGAÇÃO ENTRE TELAS (AGENDAR e USADOS)
+// ==========================================================
+
+// Elementos de Navegação na NavBar
+const navAgendar = document.getElementById('nav-schedule');
+const navUsados = document.getElementById('nav-used');     
+
+// Elementos das Seções de Conteúdo (IDs corrigidas no HTML)
+// A seção #agendamentos-section CONTÉM a sidebar e o calendário.
+const agendamentosSection = document.getElementById('agendamentos-section');
+const usedSection = document.getElementById('used-section');
+
+// Verifica se os elementos foram encontrados para evitar erros
+if (navAgendar && navUsados && agendamentosSection && usedSection) {
+    
+    /**
+     * Controla a visibilidade das seções de conteúdo e o estado ativo da navegação.
+     * @param {string} sectionToShowId - O ID da seção a ser mostrada ('agendamentos-section' ou 'used-section').
+     */
+    function navigateToSection(sectionToShowId) {
+        // 1. Esconde ambas as seções
+        agendamentosSection.classList.add('hidden');
+        usedSection.classList.add('hidden');
+
+        // 2. Remove o estado ativo de ambos os botões de navegação
+        navAgendar.classList.remove('active');
+        navUsados.classList.remove('active');
+
+        // 3. Mostra a seção correta e ativa o botão correspondente
+        if (sectionToShowId === 'agendamentos-section') {
+            agendamentosSection.classList.remove('hidden');
+            navAgendar.classList.add('active');
+            
+            // Opcional: Recarrega a lista de equipamentos e calendário ao voltar para Agendar
+            // loadEquipamentosList();
+            // renderCalendar(new Date()); 
+            
+        } else if (sectionToShowId === 'used-section') {
+            usedSection.classList.remove('hidden');
+            navUsados.classList.add('active');
+            
+            // TODO: Chame a função para carregar e exibir os dados de histórico (usados) reais aqui.
+            // fetchUsedEquipamentos(); 
+        }
+    }
+
+    // Event Listeners para a Navegação
+    navAgendar.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateToSection('agendamentos-section');
+    });
+
+    navUsados.addEventListener('click', (e) => {
+        e.preventDefault();
+        navigateToSection('used-section');
+    });
+
+    // Inicializa a navegação (Garante a tela correta ao carregar a página)
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicializa para a tela de Agendamento (que está como 'active' no HTML)
+        navigateToSection('agendamentos-section');
+    });
+    
+} else {
+    console.error("Erro: Elementos de navegação ou seções principais não encontrados no DOM. Verifique as IDs 'nav-schedule', 'nav-used', 'agendamentos-section', 'used-section'.");
+}
+
+async function loadUsedItems() {
+    const usedSection = document.getElementById('used-section');
+    const usedListGrid = document.getElementById('used-list-grid');
+    usedListGrid.innerHTML = ''; // Limpa o conteúdo anterior
+
+    try {
+        const response = await fetch('/agendamentos');
+        const data = await response.json();
+
+        if (data.success && data.agendamentos.length > 0) {
+            data.agendamentos.forEach(item => {
+                const card = `
+                    <div class="product-card used-card">
+                        <div class="product-image-container">
+                            <img class="product-image" src="/equipamento/imagem/${item.idEquipamento}" alt="${item.nomeEquipamento}">
+                        </div>
+                        <div class="product-name">${item.nomeEquipamento}</div>
+                        <div class="product-meta">
+                            <span class="user-name"><i class="fas fa-user"></i> ${item.nomeSolicitante}</span>
+                        </div>
+                        <div class="product-meta">
+                            <span class="days-indicator" style="background-color: var(--medium-blue);">
+                                <i class="fas fa-calendar-plus"></i> Retirada: ${new Date(item.dataHorarioAg).toLocaleString('pt-BR')}
+                            </span>
+                        </div>
+                        <div class="product-meta">
+                            <span class="days-indicator" style="background-color: var(--dark-blue);">
+                                <i class="fas fa-calendar-check"></i> Devolução: ${new Date(item.dataHorarioDev).toLocaleString('pt-BR')}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                usedListGrid.insertAdjacentHTML('beforeend', card);
+            });
+        } else {
+            usedListGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Nenhum agendamento encontrado.</p>';
+        }
+    } catch (error) {
+        console.error('Erro ao carregar itens usados:', error);
+        usedListGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Erro ao carregar os dados.</p>';
+    }
+}

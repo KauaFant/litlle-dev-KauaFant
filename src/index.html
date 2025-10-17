@@ -148,9 +148,8 @@
         </div>
     </div>
 
-    <!-- ================= MODAL DE AGENDAMENTO ================= -->
-    <div id="agendamento-modal" class="modal-overlay">
-        <div class="modal-content confirmation-content">
+   <div id="agendamento-modal" class="modal-overlay"> 
+    <div class="modal-content confirmation-content">
             <h3>Confirmar Agendamento</h3>
             <form id="agendamento-form">
                 <p>Você está agendando o equipamento <strong><span id="modal-equipamento-nome" style="color: var(--dark-blue);"></span></strong> para retirada no dia <strong><span id="modal-data-retirada" style="color: var(--dark-blue);"></span></strong>.</p>
@@ -183,6 +182,42 @@
         </div>
     </div>
 
+    <div class="content-container">
+    
+        <div class="search-section">
+            <div class="search-bar-top">
+                <input type="text" placeholder="Buscar equipamento...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        
+        <section id="agendamentos-section" class="schedule-layout"> 
+            
+            <div class="product-selection-sidebar empty-state">
+                <div class="create-product-card" id="open-cadastro-modal">
+                    <i class="fas fa-plus-circle"></i>
+                    <span class="create-text">Cadastrar Novo Equipamento</span>
+                    <span class="create-tip">Clique para abrir o formulário</span>
+                </div>
+                <div class="product-list">
+                    </div>
+            </div>
+    
+            <div class="calendar-area">
+                <h2 class="month-title" id="current-month-year">Outubro 2024</h2>
+                <div class="calendar-grid">
+                    </div>
+                
+                <button class="confirm-btn" id="open-agendamento-btn" disabled>
+                    Agendar
+                </button>
+            </div>
+    
+        </section>
+    
+        <section id="used-section" class="products-grid hidden"> 
+            <h2 style="grid-column: 1 / -1;">Histórico de Agendamentos (Usados)</h2>
+            
     <script src="script.js"></script> 
 </body>
 </html>

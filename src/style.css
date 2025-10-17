@@ -35,7 +35,7 @@ body {
     color: var(--text-dark);
 }
 
-   .navbar {
+.navbar {
     display: flex;
     align-items: center;
     background-color: var(--dark-blue);
@@ -45,7 +45,6 @@ body {
     top: 0;
     z-index: 1000;
     box-shadow: 0 2px 6px var(--shadow-light);
-
     justify-content: space-between;
 }
 
@@ -53,7 +52,6 @@ body {
     display: flex;
     flex-direction: column;
     line-height: 1.1;
-
     margin-right: 20px;
 }
 
@@ -73,7 +71,6 @@ body {
     display: flex;
     flex-grow: 1; 
     justify-content: center; 
-
     gap: 40px;
 }
 
@@ -84,7 +81,6 @@ body {
     background-color: transparent;
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease-in-out;
-
     font-size: 1.1em;
     font-weight: 300;
     letter-spacing: 0.5px;
@@ -98,7 +94,6 @@ body {
     background-color: var(--main-blue);
     border-bottom-color: var(--light-blue);
     font-weight: 700;
-
     letter-spacing: 0.5px; 
 }
 
@@ -125,7 +120,7 @@ body {
     align-items: center;
     width: 380px;
     border: 1px solid var(--border-gray);
-    border-radius: 50px; /* 🔹 arredondado */
+    border-radius: 50px; 
     background-color: var(--white);
     overflow: hidden;
     box-shadow: 0 2px 6px var(--shadow-light);
@@ -144,7 +139,7 @@ body {
     font-size: 1em;
     font-weight: 300;
     color: var(--text-dark);
-    border-radius: 50px 0 0 50px; /* 🔹 arredonda o lado esquerdo */
+    border-radius: 50px 0 0 50px; 
 }
 
 .search-bar-top button {
@@ -155,7 +150,7 @@ body {
     cursor: pointer;
     font-size: 1.1em;
     transition: background 0.2s ease;
-    border-radius: 0 50px 50px 0; /* 🔹 arredonda o lado direito */
+    border-radius: 0 50px 50px 0; 
 }
 
 .search-bar-top button:hover {
@@ -191,13 +186,20 @@ body {
     margin-bottom: 10px;
 }
 
+.product-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 140px;
+    margin-bottom: 10px;
+}
+
 .product-image {
     width: 80%;
-    height: 140px;
+    max-height: 100%;
     object-fit: contain;
     background: var(--white);
     padding: 10px;
-    margin: 0 auto;
     border-radius: 4px;
 }
 
@@ -243,11 +245,10 @@ body {
 }
 
 .product-selection-sidebar.empty-state {
-    /* Centraliza o conteúdo (o botão) */
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 600px; /* Mantém a altura para centralizar bem */
+    height: 600px; 
     padding: 20px;
 }
 
@@ -264,10 +265,11 @@ body {
     align-items: center;
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
+    margin-bottom: 20px; /* Mantido visível */
 }
 
 .create-product-card:hover {
-    background-color: var(--gray-card); /* Cor clara no hover */
+    background-color: var(--gray-card); 
     border-color: var(--main-blue);
 }
 
@@ -290,43 +292,73 @@ body {
     margin-top: 5px;
 }
 
+/* ========================================================== */
+/* REGRAS GERAIS DE MODAL (UNIFICADAS E CORRIGIDAS) */
+/* ========================================================== */
 .modal-overlay {
-    display: none; /* ESCONDE POR PADRÃO */
+    display: none; 
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente */
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6); 
     z-index: 1000;
+    /* CHAVE PARA CENTRALIZAÇÃO */
     justify-content: center;
     align-items: center;
 }
 
 .modal-overlay.visible {
-    display: flex; /* OU block, dependendo do design, mas 'flex' é ideal para centralizar */
+    display: flex !important; /* Força a exibição e centralização */
 }
 
-.cadastro-content .form-group,
-.confirmation-content .form-group {
+.modal-content {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-hover);
+    width: 90%;
+    /* Garante que o conteúdo não saia do centro */
+    position: relative; 
+    top: auto;
+    left: auto;
+    transform: none; 
+}
+
+.modal-content.cadastro-content {
+    max-width: 600px;
+    padding: 40px;
+}
+
+.modal-content.confirmation-content {
+    max-width: 450px; 
+    padding: 30px;
+}
+
+.modal-content h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--main-blue);
+}
+
+.form-group {
     display: block; 
     margin-bottom: 20px;
 }
 
-.cadastro-content label,
-.confirmation-content label {
+.form-group label {
     font-weight: 700;
     display: block;
     margin-bottom: 5px;
     color: var(--dark-blue);
 }
 
-.cadastro-content input[type="text"],
-.cadastro-content textarea,
-.cadastro-content input[type="file"],
-.confirmation-content input[type="text"],
-.confirmation-content input[type="date"],
-.confirmation-content input[type="time"] {
+.form-group input[type="text"],
+.form-group textarea,
+.form-group input[type="file"],
+.form-group input[type="date"],
+.form-group input[type="time"] {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--border-gray);
@@ -356,257 +388,20 @@ body {
     display: inline;
 }
 
-.cadastro-content .modal-actions {
+.modal-actions {
+    display: flex;
+    justify-content: flex-end; 
     margin-top: 40px;
 }
 
-.schedule-layout {
-    display: flex;
-    gap: 30px;
-}
-
-/* ALTERAÇÃO: Aumenta a largura da sidebar para acomodar mais detalhes */
-.product-selection-sidebar {
-    width: 380px; 
-    flex-shrink: 0;
-    background-color: var(--white);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 6px var(--shadow-light);
-}
-
-.calendar-area {
-    flex-grow: 1;
-    background-color: var(--white);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 6px var(--shadow-light);
-}
-
-.month-title {
-    color: var(--dark-blue);
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 1.8em;
-}
-
-.calendar-grid {
-    /* 🛑 ESTA É A CHAVE DA CORREÇÃO: Usa Grid Layout */
-    display: grid; 
-    /* Define 7 colunas de largura igual para os 7 dias da semana */
-    grid-template-columns: repeat(7, 1fr); 
-    gap: 1px;
-    border: 1px solid var(--border-gray);
-    border-radius: 4px;
-    overflow: hidden; /* Garante que as bordas fiquem limpas */
-}
-
-.day-header {
-    background-color: var(--gray-card);
-    color: var(--dark-blue);
-    font-weight: 700;
-    padding: 10px 5px;
-    text-align: center;
-    font-size: 0.9em;
-    border-right: 1px solid var(--border-gray);
-}
-.day-header:last-child {
-    border-right: none;
-}
-
-.calendar-day {
-    background-color: var(--white);
-    height: 90px;
-    padding: 8px;
-    border-top: 1px solid var(--border-gray);
-    border-right: 1px solid var(--border-gray);
-    font-size: 1.2em;
-    color: var(--text-dark);
-    text-align: right;
-}
-.calendar-day:nth-child(7n) { /* Remove a borda direita do último dia da semana (Sábado) */
-    border-right: none;
-}
-
-.calendar-day.prev-month,
-.calendar-day.next-month {
-    color: var(--border-gray);
-    background-color: var(--gray-bg);
-}
-
-.confirm-btn {
-    display: block;
-    width: 250px;
-    margin: 25px auto 0;
-    padding: 12px 20px;
-    background-color: var(--main-blue);
-    color: var(--white);
-    border: none;
-    border-radius: 5px;
-    font-size: 1.1em;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.confirm-btn:disabled {
-    background-color: var(--border-gray);
-    cursor: not-allowed;
-}
-
-.confirm-btn:not([disabled]) {
-    background-color: var(--main-blue); /* Cor principal quando ativo */
-    color: var(--white);
-    opacity: 1;
-    cursor: pointer;
-    box-shadow: 0 4px 8px var(--shadow-light);
-}
-
-.confirm-btn:not([disabled]):hover {
-    background-color: var(--dark-blue); /* Azul mais escuro no hover */
-}
-
-.product-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    max-height: 560px; /* Ajuste para caber bem na sidebar */
-    overflow-y: auto;
-    padding-right: 5px; /* Espaço para a barra de rolagem não cortar o conteúdo */
-}
-
-.product-selection-sidebar:not(.empty-state) {
-    /* Remove a centralização de item único */
-    display: block;
-    height: auto; 
-    padding: 20px;
-}
-
-.product-item-card {
-    background-color: var(--gray-card);
-    border-radius: 6px;
-    padding: 15px 10px 40px 10px; /* Aumenta o padding inferior para caber o botão */
-    display: flex;
-    align-items: flex-start; /* Alinha no topo para dar mais espaço */
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 2px solid transparent; 
-    position: relative; /* Necessário para posicionar o botão */
-}
-
-.product-item-card:hover {
-    background-color: #e0e4eb; 
-}
-
-.product-item-card.selected {
-    border-color: var(--main-blue);
-    background-color: #dbe4f0; 
-    box-shadow: 0 1px 6px var(--shadow-hover);
-}
-
-.product-item-image-container {
-    flex-shrink: 0;
-    width: 70px; /* Levemente maior */
-    height: 70px; /* Levemente maior */
-    margin-right: 15px;
-    background-color: var(--white);
-    border-radius: 4px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border-gray);
-}
-
-.product-item-image {
-    width: 90%;
-    height: 90%;
-    object-fit: contain;
-}
-
-.product-item-details {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    /* Ajusta a largura para caber a imagem e o status */
-    max-width: calc(100% - 70px - 70px); 
-}
-
-.product-item-name {
-    font-size: 1.0em; 
-    font-weight: 700;
-    color: var(--dark-blue);
-    margin-bottom: 4px;
-}
-
-.product-item-meta {
-    font-size: 0.85em;
-    color: var(--text-dark);
-    font-weight: 300;
-}
-
-.product-item-description {
-    font-size: 0.8em; /* Aumenta a fonte */
-    color: #444; /* Cor um pouco mais escura */
-    font-weight: 300;
-    margin-top: 8px;
-    /* Limita o texto a 3 linhas */
-    display: -webkit-box;
-    -webkit-line-clamp: 3; 
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.4;
-}
-
-.product-item-status {
-    flex-shrink: 0;
-    margin-left: 10px;
-    font-size: 0.8em; /* Aumenta a fonte */
-    font-weight: 700;
-    padding: 5px 10px;
-    border-radius: 4px;
-    color: var(--white);
-    background-color: var(--medium-blue);
-}
-
-.select-button {
-    position: absolute; /* Posição absoluta dentro do card */
-    right: 10px;
-    bottom: 10px; /* Canto inferior direito */
-    background-color: var(--main-blue);
-    color: var(--white);
-    border: none;
-    border-radius: 4px;
-    padding: 6px 10px;
-    font-size: 0.85em;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    z-index: 5; /* Garante que ele fique acima de outros elementos do card */
-}
-
-.select-button:hover {
-    background-color: var(--light-blue);
-}
-
-.product-item-card.selected .select-button {
-    background-color: var(--dark-blue);
-}
-
-/* O botão "Adicionar Equipamento" sempre visível */
-.create-product-card {
-    margin-bottom: 20px;
-}
-
-.cadastro-content .modal-actions button,
-.confirmation-content .modal-actions button {
+.modal-actions button {
     padding: 10px 20px;
     border-radius: 4px;
     font-size: 1em;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    min-width: 120px; /* Garante que os botões tenham um tamanho mínimo */
+    min-width: 120px;
 }
 
 .confirm-modal-btn {
@@ -633,150 +428,292 @@ body {
     box-shadow: 0 1px 4px var(--shadow-light);
 }
 
-.modal-content {
+/* ========================================================== */
+/* CALENDÁRIO E LAYOUT DE AGENDAMENTO */
+/* ========================================================== */
+.schedule-layout {
+    display: flex;
+    gap: 30px;
+}
+
+.product-selection-sidebar {
+    width: 380px; 
+    flex-shrink: 0;
     background-color: var(--white);
-    padding: 30px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px var(--shadow-hover);
-    max-width: 500px;
-    width: 90%;
+    padding: 20px;
+    box-shadow: 0 2px 6px var(--shadow-light);
 }
 
-.modal-content.confirmation-content {
-    /* Largura menor para o modal de confirmação de AGENDAMENTO */
-    max-width: 450px; 
-    padding: 30px;
-}
-.modal-content.confirmation-content h3 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: var(--main-blue);
-}
-
-.modal-content.cadastro-content {
-    width: 600px; /* Largura para o modal de CADASTRO */
-    padding: 40px;
-}
-
-.cadastro-content .form-group,
-.confirmation-content .form-group {
-    display: block; 
-    margin-bottom: 20px;
-}
-
-.cadastro-content label,
-.confirmation-content label {
-    font-weight: 700;
+.product-selection-sidebar:not(.empty-state) {
     display: block;
-    margin-bottom: 5px;
-    color: var(--dark-blue);
+    height: auto; 
+    padding: 20px;
 }
 
-.cadastro-content input[type="text"],
-.cadastro-content textarea,
-.cadastro-content input[type="file"],
-.confirmation-content input[type="text"],
-.confirmation-content input[type="date"],
-.confirmation-content input[type="time"] {
-    width: 100%;
-    padding: 10px;
+.product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 560px; 
+    overflow-y: auto;
+    padding-right: 5px; 
+}
+
+.calendar-area {
+    flex-grow: 1;
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 6px var(--shadow-light);
+}
+
+.month-title {
+    color: var(--dark-blue);
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.8em;
+}
+
+.calendar-grid {
+    display: grid; 
+    grid-template-columns: repeat(7, 1fr); 
+    gap: 1px;
     border: 1px solid var(--border-gray);
     border-radius: 4px;
-    font-size: 1em;
-    box-sizing: border-box;
+    overflow: hidden; 
 }
 
-/* Garante que os botões fiquem alinhados à direita */
-.cadastro-content .modal-actions,
-.confirmation-content .modal-actions {
-    display: flex;
-    justify-content: flex-end; /* Alinha os botões à direita */
-    margin-top: 40px;
-}
-
-.calendar-day.selected-day {
-    /* Cor de Fundo do dia selecionado */
-    background-color: var(--main-blue); 
-    color: var(--white); /* Cor do texto */
+.day-header {
+    background-color: var(--gray-card);
+    color: var(--dark-blue);
     font-weight: 700;
-    /* Destaque visual: Sombra ou Borda */
-    box-shadow: inset 0 0 0 3px var(--light-blue);
-    border: 1px solid var(--dark-blue) !important;
+    padding: 10px 5px;
+    text-align: center;
+    font-size: 0.9em;
+    border-right: 1px solid var(--border-gray);
+}
+.day-header:last-child {
+    border-right: none;
 }
 
-/* Garante que o número do dia selecionado se destaque */
-.calendar-day.selected-day .day-number {
-    color: var(--white);
-}
-
-/* Garante que o cursor mude */
 .calendar-day {
+    background-color: var(--white);
+    height: 90px;
+    padding: 8px;
+    border-top: 1px solid var(--border-gray);
+    border-right: 1px solid var(--border-gray);
+    font-size: 1.2em;
+    color: var(--text-dark);
+    text-align: right;
     cursor: pointer;
-    /* Adiciona uma transição suave ao clicar */
     transition: background-color 0.1s ease, box-shadow 0.1s ease;
+}
+.calendar-day:nth-child(7n) { 
+    border-right: none;
 }
 
 .calendar-day:hover {
     background-color: var(--gray-card);
 }
 
-.calendar-day.prev-month:hover,
-.calendar-day.next-month:hover {
-    /* Não muda a cor de fundo dos dias de outros meses no hover */
+.calendar-day.prev-month,
+.calendar-day.next-month {
+    color: var(--border-gray);
     background-color: var(--gray-bg);
     cursor: not-allowed;
 }
 
-/* O número do dia em si (se estiver em um span para data real) */
-.day-number {
-    /* Se o seu dia for apenas o texto dentro do div, ignore isso */
+.calendar-day.prev-month:hover,
+.calendar-day.next-month:hover {
+    background-color: var(--gray-bg);
+}
+
+.calendar-day.selected-day {
+    background-color: var(--main-blue); 
+    color: var(--white); 
     font-weight: 700;
+    box-shadow: inset 0 0 0 3px var(--light-blue);
+    border: 1px solid var(--dark-blue) !important;
 }
 
-.calendar-actions {
-    text-align: center; /* Centraliza o botão */
-    margin-top: 25px;
-}
-
-/* Controle de Visibilidade das Seções */
-.content-section.hidden {
-    display: none;
-}
-
-.content-section.visible {
+.confirm-btn {
     display: block;
+    width: 250px;
+    margin: 25px auto 0;
+    padding: 12px 20px;
+    background-color: var(--main-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-/* Título da nova tela */
-#used-content h2 {
-    color: var(--dark-blue);
-    margin-bottom: 25px;
-    font-size: 2em;
+.confirm-btn:disabled {
+    background-color: var(--border-gray);
+    cursor: not-allowed;
 }
 
-#used-content .search-section {
-    /* Mantenha a barra de pesquisa alinhada à direita se desejar */
-    justify-content: flex-end; 
+.confirm-btn:not([disabled]) {
+    background-color: var(--main-blue);
+    color: var(--white);
+    opacity: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 8px var(--shadow-light);
 }
 
-/* Estilização específica para o card de Histórico/Usado */
-.product-card.used-card {
-    height: 320px; /* Aumenta um pouco para caber 4 linhas */
-    padding: 20px;
-    background-color: var(--white); /* Fundo branco para diferenciar */
+.confirm-btn:not([disabled]):hover {
+    background-color: var(--dark-blue); 
+}
+
+/* ========================================================== */
+/* CARDS DE EQUIPAMENTO NA SIDEBAR */
+/* ========================================================== */
+
+.product-item-card {
+    background-color: var(--gray-card);
+    border-radius: 6px;
+    padding: 15px 10px 40px 10px; 
+    display: flex;
+    align-items: flex-start; 
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent; 
+    position: relative; 
+}
+
+.product-item-card:hover {
+    background-color: #e0e4eb; 
+}
+
+.product-item-card.selected {
+    border-color: var(--main-blue);
+    background-color: #dbe4f0; 
+    box-shadow: 0 1px 6px var(--shadow-hover);
+}
+
+.product-item-image-container {
+    flex-shrink: 0;
+    width: 70px; 
+    height: 70px; 
+    margin-right: 15px;
+    background-color: var(--white);
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--border-gray);
 }
 
+.product-item-image {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+.product-item-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: calc(100% - 70px - 70px); 
+}
+
+.product-item-name {
+    font-size: 1.0em; 
+    font-weight: 700;
+    color: var(--dark-blue);
+    margin-bottom: 4px;
+}
+
+.product-item-meta {
+    font-size: 0.85em;
+    color: var(--text-dark);
+    font-weight: 300;
+}
+
+.product-item-description {
+    font-size: 0.8em; 
+    color: #444; 
+    font-weight: 300;
+    margin-top: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.product-item-status {
+    flex-shrink: 0;
+    margin-left: 10px;
+    font-size: 0.8em; 
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: var(--white);
+    background-color: var(--medium-blue);
+}
+
+.select-button {
+    position: absolute; 
+    right: 10px;
+    bottom: 10px; 
+    background-color: var(--main-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 0.85em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    z-index: 5; 
+}
+
+.select-button:hover {
+    background-color: var(--light-blue);
+}
+
+.product-item-card.selected .select-button {
+    background-color: var(--dark-blue);
+}
+
+#used-section {
+    padding-top: 20px; /* Adiciona um espaço superior, se necessário */
+    /* Garante que o grid-template-columns do .products-grid seja aplicado */
+}
+
+#used-section h2 {
+    color: var(--dark-blue);
+    margin-bottom: 25px;
+    font-size: 2em;
+    /* CHAVE: Garante que o H2 ocupe todas as colunas do grid */
+    grid-column: 1 / -1; 
+}
+
+.product-card.used-card {
+    height: 320px; 
+    padding: 20px;
+    background-color: var(--white); 
+    border: 1px solid var(--border-gray);
+    /* Garante que o card de histórico siga o layout de coluna */
+    display: flex; 
+    flex-direction: column;
+}
 .product-card.used-card .product-meta {
     padding-top: 5px;
     margin-top: 5px;
-    border-top: none; /* Remove a linha divisória */
-    flex-direction: column; /* Coloca os spans um abaixo do outro */
+    border-top: none; 
+    flex-direction: column; 
     align-items: flex-start;
 }
 
 .product-card.used-card .days-indicator {
-    display: block; /* Ocupa a largura total na coluna */
+    display: block; 
     margin-top: 5px;
     padding: 8px 12px;
 }
@@ -786,51 +723,19 @@ body {
     font-size: 1.1em;
 }
 
+/* Utilitários */
 .hidden {
     display: none !important;
 }
 .visible {
-    display: block !important;
-}
-#cadastro-modal .modal-content.cadastro-content {
-    position: relative; /* mantém a hierarquia flex normal */
-    top: auto;
-    left: auto;
-    transform: none; /* remove possíveis deslocamentos antigos */
-}
-
-/* Garante centralização perfeita na tela */
-#cadastro-modal {
-    /* O display: none é definido na classe .modal-overlay, mas é REFORÇADO aqui para corrigir a visibilidade inicial. */
-    display: none; 
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9999; /* Alto z-index para sobrepor tudo */
-    
-    /* Garante que o flexbox para centralização esteja configurado */
-    justify-content: center;
-    align-items: center;
-}
-
-#cadastro-modal.visible {
-    /* FORÇA o display: flex para corrigir a centralização e a visibilidade */
-    display: flex !important;
+    /* Força a visibilidade, mas a regra .modal-overlay.visible é mais específica */
+    display: flex !important; 
 }
 
 /* Ajuste para telas menores */
 @media (max-width: 650px) {
-    #cadastro-modal .modal-content.cadastro-content {
+    .modal-content.cadastro-content {
         width: 90%;
         padding: 20px;
     }
-}
-
-.agendamento-modal {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
