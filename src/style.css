@@ -170,7 +170,8 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 280px;
+    /* ALTERAÇÃO: Mudar de 280px para auto */
+    height: auto; 
     box-shadow: 0 1px 4px var(--shadow-light);
     transition: box-shadow 0.2s ease;
 }
@@ -468,11 +469,36 @@ body {
     box-shadow: 0 2px 6px var(--shadow-light);
 }
 
-.month-title {
-    color: var(--dark-blue);
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 1.8em;
+.month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.month-arrow {
+    background: transparent;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    font-size: 1.2em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.08s;
+}
+
+.month-arrow:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px var(--shadow-light);
+}
+
+#month-title {
+    margin: 0;
+    font-size: 1.6em;
 }
 
 .calendar-grid {
@@ -687,40 +713,59 @@ body {
     /* Garante que o grid-template-columns do .products-grid seja aplicado */
 }
 
-#used-section h2 {
-    color: var(--dark-blue);
-    margin-bottom: 25px;
-    font-size: 2em;
-    /* CHAVE: Garante que o H2 ocupe todas as colunas do grid */
-    grid-column: 1 / -1; 
+#used-section {
+    animation: fadeIn 0.3s ease-in;
+}
+
+#used-list-grid {
+    margin-top: 20px;
 }
 
 .product-card.used-card {
-    height: 320px; 
-    padding: 20px;
-    background-color: var(--white); 
+    background-color: var(--white);
     border: 1px solid var(--border-gray);
-    /* Garante que o card de histórico siga o layout de coluna */
-    display: flex; 
-    flex-direction: column;
+    box-shadow: 0 2px 5px var(--shadow-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.product-card.used-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px var(--shadow-hover);
+}
+
+.product-card.used-card .product-meta span {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
 .product-card.used-card .product-meta {
-    padding-top: 5px;
+    /* Ajusta o padding para que as datas se encaixem melhor */
+    padding-top: 5px; 
     margin-top: 5px;
-    border-top: none; 
-    flex-direction: column; 
-    align-items: flex-start;
+    /* Altera para display flex para melhor controle de alinhamento vertical das datas */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Alinha o texto das datas à esquerda */
+    border-top: none; /* Remove a linha divisória extra */
 }
 
-.product-card.used-card .days-indicator {
-    display: block; 
-    margin-top: 5px;
-    padding: 8px 12px;
+.product-card.used-card .product-meta:nth-of-type(2) {
+    border-top: 1px solid var(--border-gray); /* Mantém a linha divisória acima do nome do usuário */
+    margin-bottom: 0px;
 }
 
-.product-card.used-card .product-name {
-    margin-bottom: 15px;
-    font-size: 1.1em;
+.product-card.used-card .product-meta .days-indicator {
+    /* Garante que o indicador ocupe a largura completa ou se ajuste */
+    width: 100%; 
+    text-align: left;
+    margin-top: 8px; /* Espaçamento entre as datas */
+    box-sizing: border-box; /* Inclui padding e border na largura total */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Utilitários */

@@ -29,6 +29,28 @@ function executePromisified(sql, values) {
 // ======================================================================
 // ROTA: CADASTRAR NOVO EQUIPAMENTO
 // ======================================================================
+app.get('/agendamentos', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                a.idAgendamento,
+                a.nomeSolicitante,
+                a.dataHorarioAg,
+                a.dataHorarioDev,
+                e.nomeEquipamento,
+                e.idEquipamentos AS idEquipamento
+            FROM agendamento a
+            JOIN equipamentos e ON a.idEquipamento = e.idEquipamentos
+            ORDER BY a.dataHorarioAg DESC
+        `;
+        const agendamentos = await executePromisified(query);
+        res.json({ success: true, agendamentos });
+    } catch (erro) {
+        console.error('Erro ao listar agendamentos:', erro);
+        res.status(500).json({ success: false, message: 'Erro ao listar agendamentos.' });
+    }
+});
+
 app.post('/equipamento/cadastro', upload.single('imagemEquipamento'), async (req, res) => {
     const file = req.file;
     const { fornecedor, nomeEquipamento, descricao, altoValor } = req.body;
@@ -115,27 +137,65 @@ app.get('/equipamento/imagem/:id', async (req, res) => {
 // ======================================================================
 // 🆕 ROTA: CADASTRAR NOVO AGENDAMENTO
 // ======================================================================
-app.post('/agendamento/novo', async (req, res) => {
-    const { idEquipamento, nomeSolicitante, dataHorarioAg, dataHorarioDev } = req.body;
-
-    if (!idEquipamento || !nomeSolicitante || !dataHorarioAg || !dataHorarioDev) {
-        return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios.' });
-    }
+app.get('/agendamentos', async (req, res) => {
+    const search = req.query.search || ''; // termo digitado na barra
 
     try {
+        let query = `
+            SELECT 
+                a.idAgendamento,
+                a.nomeSolicitante,
+                a.dataHorarioAg,
+                a.dataHorarioDev,
+                e.nomeEquipamento,
+                e.idEquipamentos AS idEquipamento
+            FROM agendamento a
+            JOIN equipamentos e ON a.idEquipamento = e.idEquipamentos
+        `;
+        const values = [];
+
+        if (search.trim() !== '') {
+            query += `
+                WHERE a.nomeSolicitante LIKE ? 
+                OR e.nomeEquipamento LIKE ?
+            `;
+            const like = `%${search}%`;
+            values.push(like, like);
+        }
+
+        query += ` ORDER BY a.dataHorarioAg DESC`;
+
+        const agendamentos = await executePromisified(query, values);
+        res.json({ success: true, agendamentos });
+
+    } catch (erro) {
+        console.error('Erro ao listar agendamentos:', erro);
+        res.status(500).json({ success: false, message: 'Erro ao listar agendamentos.' });
+    }
+});
+
+app.post('/agendamento/novo', async (req, res) => {
+    try {
+        const { idEquipamento, nomeSolicitante, dataHorarioAg, dataHorarioDev } = req.body;
+
+        // Validação simples
+        if (!idEquipamento || !nomeSolicitante || !dataHorarioAg || !dataHorarioDev) {
+            return res.status(400).json({ success: false, message: 'Preencha todos os campos obrigatórios.' });
+        }
+
+        // Query de inserção
         const query = `
             INSERT INTO agendamento (idEquipamento, nomeSolicitante, dataHorarioAg, dataHorarioDev)
             VALUES (?, ?, ?, ?)
         `;
         const values = [idEquipamento, nomeSolicitante, dataHorarioAg, dataHorarioDev];
-        const resultado = await executePromisified(query, values);
 
-        console.log("✅ Novo agendamento inserido! ID:", resultado.insertId);
-        res.json({ success: true, message: 'Agendamento salvo com sucesso!' });
+        await executePromisified(query, values);
 
+        res.json({ success: true, message: 'Agendamento cadastrado com sucesso!' });
     } catch (erro) {
-        console.error('Erro ao salvar agendamento:', erro);
-        res.status(500).json({ success: false, message: 'Erro interno ao salvar o agendamento.' });
+        console.error('Erro ao cadastrar o agendamento:', erro);
+        res.status(500).json({ success: false, message: 'Erro ao cadastrar o agendamento.' });
     }
 });
 

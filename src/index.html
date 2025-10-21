@@ -17,7 +17,7 @@
         </div>
       
         <nav class="main-nav">
-            <a href="#" id="nav-used" class="nav-item">Usados</a>
+            <a href="#" id="nav-used" class="nav-item">Em Uso</a>
             <a href="#" id="nav-schedule" class="nav-item active">Agendar</a>
             <a href="#" class="nav-item">Pendentes</a>
             <a href="#" class="nav-item">Relatórios</a>
@@ -31,82 +31,45 @@
 
     <!-- ================= CONTEÚDO PRINCIPAL ================= -->
     <main class="content-container">
+        <!-- ======== ABA USADOS ======== -->
         <section id="used-section" class="hidden">
-            <h2><i class="fas fa-history"></i> Histórico de Agendamentos (Usados)</h2>
-        
+            <h2><i class="fas fa-history"></i> Equipamentos Usados</h2>
+    
             <div class="search-section">
                 <div class="search-bar-top">
-                    <input type="text" placeholder="Pesquisar solicitante ou equipamento...">
+                    <input type="text" id="search-used" placeholder="Pesquisar solicitante ou equipamento...">
                     <button><i class="fas fa-search"></i></button>
                 </div>
             </div>
-        
+    
             <div id="used-list-grid" class="products-grid">
-                <div class="product-card used-card">
-                    <div class="product-image-container">
-                        <img class="product-image" src="./img/default-equipamento.png" alt="Equipamento Usado">
+                <!-- O JavaScript vai preencher com os cards dos agendamentos -->
+            </div>
+        </section>
+    
+        <!-- ======== ABA AGENDAR ======== -->
+        <section id="agendamentos-section">
+            <div class="schedule-layout">
+                <aside id="product-sidebar" class="product-selection-sidebar">
+                    <button id="open-cadastro-modal" class="create-product-card">
+                        <i class="fas fa-plus-circle"></i>
+                        <span class="create-text">Criar Produto</span>
+                        <span class="create-tip">Cadastre um novo equipamento para agendar.</span>
+                    </button>
+                    <div id="product-list" class="product-list"></div>
+                </aside>
+    
+                <div class="calendar-area">
+                    <div class="month-nav" aria-label="Navegação de mês">
+                        <button id="prev-month" class="month-arrow" aria-label="Mês anterior">&lsaquo;</button>
+                        <h2 id="month-title" class="month-title">Setembro 2025</h2>
+                        <button id="next-month" class="month-arrow" aria-label="Próximo mês">&rsaquo;</button>
                     </div>
-                    <div class="product-name">Equipamento: Multímetro Digital</div>
-                    <div class="product-meta">
-                        <span class="user-name"><i class="fas fa-user"></i> Usuário: João Silva</span>
-                    </div>
-                    <div class="product-meta">
-                        <span class="days-indicator" style="background-color: var(--dark-blue);">
-                            <i class="fas fa-calendar-check"></i> Devolvido em: 25/10/2025
-                        </span>
-                    </div>
-                    <div class="product-meta">
-                        <span class="days-indicator" style="background-color: var(--medium-blue);">
-                            <i class="fas fa-calendar-plus"></i> Agendado em: 22/10/2025
-                        </span>
-                    </div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
+                    <button class="confirm-btn" id="open-agendamento-btn" disabled>Agendar</button>
                 </div>
             </div>
         </section>
-        <div class="schedule-layout">
-
-            <!-- ===== SIDEBAR DE EQUIPAMENTOS ===== -->
-            <aside id="product-sidebar" class="product-selection-sidebar">
-                
-                <button id="open-cadastro-modal" class="create-product-card">
-                    <i class="fas fa-plus-circle"></i>
-                    <span class="create-text">Criar Produto</span>
-                    <span class="create-tip">Cadastre um novo equipamento para agendar.</span>
-                </button>
-
-                <div id="product-list" class="product-list"></div>
-            </aside>
-
-            <!-- ===== CALENDÁRIO ===== -->
-            <div class="calendar-area">
-                <h2 class="month-title">Setembro 2025</h2>
-                
-                <div class="calendar-grid">
-                    <div class="day-header">Domingo</div>
-                    <div class="day-header">Segunda-Feira</div>
-                    <div class="day-header">Terça-Feira</div>
-                    <div class="day-header">Quarta-Feira</div>
-                    <div class="day-header">Quinta-Feira</div>
-                    <div class="day-header">Sexta-Feira</div>
-                    <div class="day-header">Sábado</div>
-
-                    <div class="calendar-day prev-month">31</div>
-                    <div class="calendar-day">1</div><div class="calendar-day">2</div><div class="calendar-day">3</div>
-                    <div class="calendar-day">4</div><div class="calendar-day">5</div><div class="calendar-day">6</div>
-                    <div class="calendar-day">7</div><div class="calendar-day">8</div><div class="calendar-day">9</div>
-                    <div class="calendar-day">10</div><div class="calendar-day">11</div><div class="calendar-day">12</div><div class="calendar-day">13</div>
-                    <div class="calendar-day">14</div><div class="calendar-day">15</div><div class="calendar-day">16</div>
-                    <div class="calendar-day">17</div><div class="calendar-day">18</div><div class="calendar-day">19</div><div class="calendar-day">20</div>
-                    <div class="calendar-day">21</div><div class="calendar-day">22</div><div class="calendar-day">23</div>
-                    <div class="calendar-day">24</div><div class="calendar-day">25</div><div class="calendar-day">26</div><div class="calendar-day">27</div>
-                    <div class="calendar-day">28</div><div class="calendar-day">29</div><div class="calendar-day">30</div>
-                    <div class="calendar-day next-month">1</div><div class="calendar-day next-month">2</div>
-                    <div class="calendar-day next-month">3</div><div class="calendar-day next-month">4</div>
-                </div>
-
-                <button class="confirm-btn" disabled>Confirmar</button>
-            </div>
-        </div>
     </main>
 
     <!-- ================= MODAL DE CADASTRO ================= -->
@@ -181,42 +144,6 @@
             </form>
         </div>
     </div>
-
-    <div class="content-container">
-    
-        <div class="search-section">
-            <div class="search-bar-top">
-                <input type="text" placeholder="Buscar equipamento...">
-                <button><i class="fas fa-search"></i></button>
-            </div>
-        </div>
-        
-        <section id="agendamentos-section" class="schedule-layout"> 
-            
-            <div class="product-selection-sidebar empty-state">
-                <div class="create-product-card" id="open-cadastro-modal">
-                    <i class="fas fa-plus-circle"></i>
-                    <span class="create-text">Cadastrar Novo Equipamento</span>
-                    <span class="create-tip">Clique para abrir o formulário</span>
-                </div>
-                <div class="product-list">
-                    </div>
-            </div>
-    
-            <div class="calendar-area">
-                <h2 class="month-title" id="current-month-year">Outubro 2024</h2>
-                <div class="calendar-grid">
-                    </div>
-                
-                <button class="confirm-btn" id="open-agendamento-btn" disabled>
-                    Agendar
-                </button>
-            </div>
-    
-        </section>
-    
-        <section id="used-section" class="products-grid hidden"> 
-            <h2 style="grid-column: 1 / -1;">Histórico de Agendamentos (Usados)</h2>
             
     <script src="script.js"></script> 
 </body>

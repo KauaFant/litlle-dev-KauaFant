@@ -1,42 +1,41 @@
+// -----------------------------
+// script.js (ATUALIZADO)
+// -----------------------------
+
 // VARIÁVEIS GLOBAIS PARA RASTREAR A SELEÇÃO
 let selectedEquipamentoId = null;
 let selectedEquipamentoNome = null;
 let selectedDate = null;
-const confirmButton = document.querySelector('.confirm-btn');
+const confirmButton = document.querySelector('.confirm-btn') || document.getElementById('open-agendamento-btn');
 
-// Lógica para abrir/fechar o modal de cadastro
-document.getElementById('open-cadastro-modal').addEventListener('click', () => {
+// --- Reuso de funções dos seus arquivos originais (modificadas para integração) ---
+
+// Funções de modal de cadastro (mantive sua lógica)
+document.getElementById('open-cadastro-modal')?.addEventListener('click', () => {
     document.getElementById('cadastro-modal').classList.add('visible');
 });
-
-document.getElementById('close-cadastro-modal').addEventListener('click', () => {
+document.getElementById('close-cadastro-modal')?.addEventListener('click', () => {
     document.getElementById('cadastro-modal').classList.remove('visible');
-    document.getElementById('cadastro-form').reset(); // ADICIONADO: Limpa o formulário e fecha o modal
+    document.getElementById('cadastro-form')?.reset();
 });
 
-// Lógica para envio do formulário de cadastro de equipamento
-document.getElementById('cadastro-form').addEventListener('submit', async (e) => {
+// Lógica para envio do formulário de cadastro de equipamento (mantida)
+document.getElementById('cadastro-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
-
-    // Corrige o booleano do checkbox
     formData.set('altoValor', form.elements['altoValor'].checked ? 1 : 0);
-
     try {
         const response = await fetch('/equipamento/cadastro', {
             method: 'POST',
             body: formData
         });
-
         const result = await response.json();
-
         if(result.success) {
             alert('Equipamento cadastrado com sucesso! A lista será atualizada.');
             document.getElementById('cadastro-modal').classList.remove('visible');
-            form.reset(); // ADICIONADO: Limpa o formulário após o sucesso
-            // Chama a função para carregar a lista APÓS o cadastro
-            loadProducts(); 
+            form.reset();
+            loadProducts();
         } else {
             alert('Erro ao cadastrar equipamento: ' + result.message);
         }
@@ -45,84 +44,172 @@ document.getElementById('cadastro-form').addEventListener('submit', async (e) =>
     }
 });
 
-/**
- * Função que verifica se equipamento E dia foram selecionados e atualiza o botão de confirmação.
- */
+// Atualiza o estado do botão Confirmar/Agendar
 function updateConfirmButtonState() {
+    if (!confirmButton) return;
     confirmButton.disabled = !(selectedEquipamentoId && selectedDate);
 }
 
+// --- RENDERIZAÇÃO DINÂMICA DO CALENDÁRIO ---
+
+const monthNames = [
+    'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
+];
+
+let current = new Date(); // mês/ano atual - você pode ajustar se quiser abrir em um mês fixo
+
+const calendarGridEl = document.getElementById('calendar-grid');
+const monthTitleEl = document.getElementById('month-title');
+const prevBtn = document.getElementById('prev-month');
+const nextBtn = document.getElementById('next-month');
+
+function renderCalendar(dateObj) {
+    // Limpa grid
+    calendarGridEl.innerHTML = '';
+
+    // Cabeçalhos dos dias
+    const dayHeaders = ['Domingo','Segunda-Feira','Terça-Feira','Quarta-Feira','Quinta-Feira','Sexta-Feira','Sábado'];
+    dayHeaders.forEach(h => {
+        const el = document.createElement('div');
+        el.className = 'day-header';
+        el.textContent = h;
+        calendarGridEl.appendChild(el);
+    });
+
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth();
+
+    // Título do mês
+    monthTitleEl.textContent = `${monthNames[month]} ${year}`;
+
+    // Primeiro dia do mês (weekday) e quantos dias tem o mês
+    const firstOfMonth = new Date(year, month, 1);
+    const startWeekday = firstOfMonth.getDay(); // 0 (Dom) - 6 (Sáb)
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Quantos dias do mês anterior precisam aparecer (para completar a primeira linha)
+    const prevMonthDays = startWeekday; // 0..6
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    // Adiciona os dias do mês anterior (classes .prev-month)
+    for (let i = prevMonthDays - 1; i >= 0; i--) {
+        const dayNumber = daysInPrevMonth - i;
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day prev-month';
+        dayEl.textContent = String(dayNumber);
+        calendarGridEl.appendChild(dayEl);
+    }
+
+    // Dias do mês atual
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day';
+        dayEl.textContent = String(d);
+
+        // data completa em ISO para referência (YYYY-MM-DD)
+        dayEl.dataset.fullDate = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+        calendarGridEl.appendChild(dayEl);
+    }
+
+    // Preenche os dias do próximo mês para completar a última semana (até 42 células no total: 7x6)
+    const totalCellsSoFar = prevMonthDays + daysInMonth;
+    const nextDaysToAdd = (7 - (totalCellsSoFar % 7)) % 7;
+    for (let n = 1; n <= nextDaysToAdd; n++) {
+        const dayEl = document.createElement('div');
+        dayEl.className = 'calendar-day next-month';
+        dayEl.textContent = String(n);
+        calendarGridEl.appendChild(dayEl);
+    }
+
+    // Após renderizar, anexa a lógica de seleção dos dias
+    addCalendarSelectionLogic();
+}
+
+function goToPrevMonth() {
+    current = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+    renderCalendar(current);
+}
+function goToNextMonth() {
+    current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+    renderCalendar(current);
+}
+
+// Event listeners nas setas
+prevBtn?.addEventListener('click', goToPrevMonth);
+nextBtn?.addEventListener('click', goToNextMonth);
+
+// --- SELEÇÃO DE DIAS (mantive e adaptei sua lógica) ---
 function addCalendarSelectionLogic() {
-    // Note que a seleção é feita apenas nos dias válidos (não de meses anteriores/próximos)
+    // Seleciona apenas dias do mês atual (não prev/next)
     const calendarDays = document.querySelectorAll('.calendar-day:not(.prev-month):not(.next-month)');
 
     calendarDays.forEach(day => {
-        // CORREÇÃO: Lê o número do dia diretamente do conteúdo de texto do elemento.
-        // O código anterior estava falhando porque tentava acessar um elemento inexistente.
-        const dateValue = day.textContent; 
+        const dateValue = day.textContent;
 
+        // Remove listeners duplicados (evita múltiplos binds após re-render)
+        day.replaceWith(day.cloneNode(true));
+    });
+    // Requery depois do clone
+    const freshDays = document.querySelectorAll('.calendar-day:not(.prev-month):not(.next-month)');
+
+    freshDays.forEach(day => {
         day.addEventListener('click', () => {
-            // Só permite selecionar o dia se um equipamento estiver selecionado
             if (!selectedEquipamentoId) {
                 alert('Por favor, selecione um equipamento primeiro!');
                 return;
             }
 
-            // Desmarca o dia se ele já estiver selecionado (toggle)
             if (day.classList.contains('selected-day')) {
                 day.classList.remove('selected-day');
                 selectedDate = null;
             } else {
-                // Remove a seleção de todos os outros dias
-                calendarDays.forEach(d => d.classList.remove('selected-day'));
-
-                // Marca o dia atual
+                // Remove seleção anterior
+                document.querySelectorAll('.calendar-day.selected-day').forEach(d => d.classList.remove('selected-day'));
                 day.classList.add('selected-day');
-                // IMPORTANTE: Aqui estamos apenas salvando o NÚMERO do dia (ex: "25").
-                // O servidor precisa de "YYYY-MM-DD". O back-end precisaria de um input
-                // de mês e ano para completar a data. Por simplicidade, o back-end 
-                // usa o formato "DD-MM-YYYY". Para o exemplo, estamos salvando apenas
-                // o dia e o back-end fará a concatenação (já implementada abaixo).
-                selectedDate = dateValue; // Armazena o valor do dia selecionado
+
+                // Usa dataset.fullDate se disponível, senão monta a partir do texto
+                selectedDate = day.dataset.fullDate || (() => {
+                    // monta YYYY-MM-DD usando current
+                    const dayNum = String(day.textContent).padStart(2,'0');
+                    return `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,'0')}-${dayNum}`;
+                })();
             }
 
-            // Atualiza o estado do botão de confirmação
             updateConfirmButtonState();
         });
     });
-    
-    // Garante que o botão de confirmação está inicialmente desabilitado
-    updateConfirmButtonState(); 
+
+    // Atualiza estado do botão inicialmente
+    updateConfirmButtonState();
 }
+
+// -------------------------
+// Carregamento de produtos e seleção (mantive suas funções e integração)
+// -------------------------
 
 async function loadProducts() {
     const sidebar = document.getElementById('product-sidebar');
     const productList = document.getElementById('product-list');
-    productList.innerHTML = ''; 
+    if (!productList || !sidebar) return;
+    productList.innerHTML = '';
 
-    // Limpa o estado da seleção ao recarregar os produtos
     selectedEquipamentoId = null;
     selectedDate = null;
-    // Desmarca o dia no calendário (se houver)
-    const selectedCalendarDay = document.querySelector('.calendar-day.selected-day');
-    if (selectedCalendarDay) {
-        selectedCalendarDay.classList.remove('selected-day');
-    }
-    updateConfirmButtonState(); // Desabilita o botão de confirmação
+    // limpa seleção visual
+    document.querySelectorAll('.calendar-day.selected-day').forEach(d => d.classList.remove('selected-day'));
+    updateConfirmButtonState();
 
     try {
-        // Faz a requisição para o endpoint que lista todos os equipamentos
         const response = await fetch('/equipamentos');
         const data = await response.json();
 
         if (data.success && data.equipamentos.length > 0) {
-
-            // 1. Remove a classe 'empty-state' para mostrar a lista (e ocultar o botão "Criar Produto")
             sidebar.classList.remove('empty-state');
-            productList.style.display = 'flex'; // Exibe o contêiner da lista
+            productList.style.display = 'flex';
 
             data.equipamentos.forEach(equipamento => {
-                // Monta o HTML do cartão do produto
                 const productHtml = `
                     <div class="product-item-card" data-id="${equipamento.idEquipamentos}">
                         <div class="product-item-image-container">
@@ -139,153 +226,106 @@ async function loadProducts() {
                 `;
                 productList.insertAdjacentHTML('beforeend', productHtml);
             });
-            
-            // Adiciona a lógica de seleção APÓS renderizar os cards
+
             addSelectionLogic();
-
         } else {
-            // Se não houver produtos, garante que o estado vazio esteja ativo (mostra o botão "Criar Produto")
             sidebar.classList.add('empty-state');
-            productList.style.display = 'none'; // Oculta o contêiner da lista
+            productList.style.display = 'none';
         }
-
     } catch (error) {
         console.error('Erro ao carregar a lista de produtos:', error);
-        // Em caso de erro, mantém o estado vazio
         sidebar.classList.add('empty-state');
         productList.style.display = 'none';
     }
 }
 
-/**
- * Adiciona o ouvinte de eventos para os cartões de produto, focando no botão "Selecionar" (com lógica de toggle).
- */
 function addSelectionLogic() {
     const productCards = document.querySelectorAll('.product-item-card');
 
     productCards.forEach(card => {
         const selectButton = card.querySelector('.select-button');
         const cardId = card.dataset.id;
-        
+
         selectButton.addEventListener('click', (event) => {
-            event.stopPropagation(); 
-            
-            // 1. Lógica de TOGGLE (desselecionar se já estiver selecionado)
+            event.stopPropagation();
+
             if (card.classList.contains('selected')) {
-                // Desmarca o card atual
                 card.classList.remove('selected');
                 selectedEquipamentoId = null;
                 selectButton.textContent = 'Selecionar';
-                console.log('Equipamento Desselecionado:', cardId); 
-
             } else {
-                // 2. Lógica de SELEÇÃO
-                
-                // Desmarca todos os outros cartões
                 productCards.forEach(c => {
                     c.classList.remove('selected');
                     c.querySelector('.select-button').textContent = 'Selecionar';
                 });
 
-                // Marca o cartão atual
                 card.classList.add('selected');
                 selectedEquipamentoId = cardId;
                 selectButton.textContent = 'Selecionado';
-                console.log('Equipamento Selecionado:', cardId); 
             }
-            
-            // 3. Limpa a seleção do dia no calendário e atualiza o estado
+
+            // limpa dia selecionado
             selectedDate = null;
-            document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected-day'));
+            document.querySelectorAll('.calendar-day.selected-day').forEach(d => d.classList.remove('selected-day'));
             updateConfirmButtonState();
         });
     });
 }
 
-
-// Chama as funções de inicialização ao carregar a página
-window.addEventListener('load', () => {
-    loadProducts();
-    // É essencial chamar a lógica do calendário após a renderização inicial (ou garantir que os dias existam no DOM)
-    addCalendarSelectionLogic(); 
-});
-
-// Referências ao novo modal de agendamento (EXISTENTE)
+// -------------------------
+// Modal de agendamento (mantive sua lógica)
+// -------------------------
 const agendamentoModal = document.getElementById('agendamento-modal');
 const closeAgendamentoModalBtn = document.getElementById('close-agendamento-modal');
 const agendamentoForm = document.getElementById('agendamento-form');
 
-// Função para abrir o modal de agendamento (LIGEIRAMENTE CORRIGIDA)
 function openAgendamentoModal() {
-    // 1. Preenche o nome do equipamento e data de retirada no modal
-    // CORREÇÃO: Usa a classe correta (.product-item-card) e busca o nome pelo span correto
-    const equipamentoCard = document.querySelector(`.product-item-card[data-id="${selectedEquipamentoId}"]`); 
+    const equipamentoCard = document.querySelector(`.product-item-card[data-id="${selectedEquipamentoId}"]`);
     const equipamentoNome = equipamentoCard ? equipamentoCard.querySelector('.product-item-name').textContent : 'N/A';
-    
-    document.getElementById('modal-equipamento-nome').textContent = equipamentoNome;
-    document.getElementById('modal-data-retirada').textContent = selectedDate;
-    // Preenche o dia no label de horário de retirada
-    document.getElementById('modal-data-retirada').textContent = selectedDate; 
 
-    // 2. Exibe o modal
+    document.getElementById('modal-equipamento-nome').textContent = equipamentoNome;
+    // modal espera algo tipo DD/MM/YYYY, mas deixo o ISO para precisão
+    document.getElementById('modal-data-retirada').textContent = selectedDate || 'N/A';
+
     agendamentoModal.classList.add('visible');
 }
 
-// Lógica para abrir/fechar o modal de agendamento
 if (confirmButton) {
-    // Quando o botão CONFIRMAR do calendário é clicado
-    confirmButton.addEventListener('click', openAgendamentoModal);
+    confirmButton.addEventListener('click', (e) => {
+        // caso o botão seja o da página principal (id open-agendamento-btn) ou .confirm-btn
+        if (confirmButton.disabled) return;
+        openAgendamentoModal();
+    });
 }
 
-// Fechar modal ao clicar em Cancelar
-closeAgendamentoModalBtn.addEventListener('click', () => {
+closeAgendamentoModalBtn?.addEventListener('click', () => {
     agendamentoModal.classList.remove('visible');
-    agendamentoForm.reset(); // Limpa o formulário
+    agendamentoForm?.reset();
 });
-
-// Fechar modal ao clicar fora (no overlay)
-agendamentoModal.addEventListener('click', (e) => {
+agendamentoModal?.addEventListener('click', (e) => {
     if (e.target === agendamentoModal) {
         agendamentoModal.classList.remove('visible');
-        agendamentoForm.reset();
+        agendamentoForm?.reset();
     }
 });
 
-// Lógica de SUBMISSÃO do formulário de agendamento (EXISTENTE)
-agendamentoForm.addEventListener('submit', async (e) => {
+// Submissão do formulário de agendamento (mantive a construção dos dados)
+agendamentoForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    // Pega os dados do formulário
     const formData = new FormData(agendamentoForm);
     const nomeSolicitante = formData.get('nomeSolicitante');
     const horarioAgendamento = formData.get('horarioAgendamento');
-    const dataDevolucao = formData.get('dataDevolucao'); // YYYY-MM-DD
+    const dataDevolucao = formData.get('dataDevolucao');
     const horarioDevolucao = formData.get('horarioDevolucao');
-    
-    // Simulação do mês/ano (o código real precisaria ler o mês/ano do calendário)
-    // Para simplificar a demonstração, usaremos Setembro de 2025 como o HTML sugere.
-    const mesAno = '09-2025'; 
-    const dataRetiradaFormatada = `${selectedDate}/${mesAno}`; // DD/MM/YYYY
 
-    // Combina data e hora para os formatos DATETIME do MySQL
-    // O backend precisa processar a dataRetiradaFormatada e a dataDevolucao
-    const dataHorarioAg = `${dataRetiradaFormatada} ${horarioAgendamento}:00`; // Ex: 25/09/2025 10:00:00
-    const dataHorarioDev = `${dataDevolucao} ${horarioDevolucao}:00`;         // Ex: 2025-10-01 17:00:00
+    if (!selectedDate) {
+        alert('Selecione a data de retirada no calendário.');
+        return;
+    }
 
-    // ATENÇÃO: O back-end no index.js espera "YYYY-MM-DD HH:MM:SS" (ou um formato compatível)
-    // Precisamos de uma data completa para a retirada. Assumindo que o dia selecionado
-    // no calendário é do mês de Setembro/2025, vamos formatar a data completa.
-    // O valor do input date para devolução já é YYYY-MM-DD.
-    
-    // RE-FORMATANDO PARA O FORMATO ESPERADO PELO MYSQL/BACKEND: YYYY-MM-DD HH:MM:SS
-    // Assumindo Setembro de 2025 (como no index.html)
-    const ano = '2025';
-    const mes = '09';
-    // Garante que o dia tenha 2 dígitos (o selectedDate é o número do dia)
-    const diaRetirada = selectedDate.padStart(2, '0'); 
-    
-    const dataHorarioAg_mysql = `${ano}-${mes}-${diaRetirada} ${horarioAgendamento}:00`;
-    const dataHorarioDev_mysql = `${dataDevolucao} ${horarioDevolucao}:00`; // dataDevolucao já é YYYY-MM-DD
+    // selectedDate já está no formato YYYY-MM-DD (dataset)
+    const dataHorarioAg_mysql = `${selectedDate} ${horarioAgendamento}:00`;
+    const dataHorarioDev_mysql = `${dataDevolucao} ${horarioDevolucao}:00`;
 
     const agendamentoData = {
         idEquipamento: selectedEquipamentoId,
@@ -293,25 +333,18 @@ agendamentoForm.addEventListener('submit', async (e) => {
         dataHorarioAg: dataHorarioAg_mysql,
         dataHorarioDev: dataHorarioDev_mysql
     };
-    
-    console.log("Dados a serem enviados:", agendamentoData);
 
     try {
         const response = await fetch('/agendamento/novo', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(agendamentoData)
         });
-
         const result = await response.json();
-
         if (result.success) {
             alert('Agendamento realizado com sucesso!');
             agendamentoModal.classList.remove('visible');
             agendamentoForm.reset();
-            // Limpa o estado após o sucesso
             selectedEquipamentoId = null;
             selectedDate = null;
             document.querySelectorAll('.product-item-card.selected').forEach(c => {
@@ -328,82 +361,66 @@ agendamentoForm.addEventListener('submit', async (e) => {
         alert('Erro de conexão ao tentar agendar.');
     }
 });
-// ==========================================================
-// 4. LÓGICA DE NAVEGAÇÃO ENTRE TELAS (AGENDAR e USADOS)
-// ==========================================================
 
-// Elementos de Navegação na NavBar
+// -------------------------
+// Navegação entre telas (mantive sua lógica)
+// -------------------------
 const navAgendar = document.getElementById('nav-schedule');
-const navUsados = document.getElementById('nav-used');     
-
-// Elementos das Seções de Conteúdo (IDs corrigidas no HTML)
-// A seção #agendamentos-section CONTÉM a sidebar e o calendário.
+const navUsados = document.getElementById('nav-used');
 const agendamentosSection = document.getElementById('agendamentos-section');
 const usedSection = document.getElementById('used-section');
 
-// Verifica se os elementos foram encontrados para evitar erros
-if (navAgendar && navUsados && agendamentosSection && usedSection) {
-    
-    /**
-     * Controla a visibilidade das seções de conteúdo e o estado ativo da navegação.
-     * @param {string} sectionToShowId - O ID da seção a ser mostrada ('agendamentos-section' ou 'used-section').
-     */
-    function navigateToSection(sectionToShowId) {
-        // 1. Esconde ambas as seções
-        agendamentosSection.classList.add('hidden');
-        usedSection.classList.add('hidden');
+function navigateToSection(sectionToShowId) {
+    // Esconde ambas as seções
+    agendamentosSection.classList.add('hidden');
+    usedSection.classList.add('hidden');
+    navAgendar.classList.remove('active');
+    navUsados.classList.remove('active');
 
-        // 2. Remove o estado ativo de ambos os botões de navegação
-        navAgendar.classList.remove('active');
-        navUsados.classList.remove('active');
-
-        // 3. Mostra a seção correta e ativa o botão correspondente
-        if (sectionToShowId === 'agendamentos-section') {
-            agendamentosSection.classList.remove('hidden');
-            navAgendar.classList.add('active');
-            
-            // Opcional: Recarrega a lista de equipamentos e calendário ao voltar para Agendar
-            // loadEquipamentosList();
-            // renderCalendar(new Date()); 
-            
-        } else if (sectionToShowId === 'used-section') {
-            usedSection.classList.remove('hidden');
-            navUsados.classList.add('active');
-            
-            // TODO: Chame a função para carregar e exibir os dados de histórico (usados) reais aqui.
-            // fetchUsedEquipamentos(); 
-        }
+    // Mostra a seção clicada
+    if (sectionToShowId === 'agendamentos-section') {
+        agendamentosSection.classList.remove('hidden');
+        navAgendar.classList.add('active');
+        renderCalendar(current);
+    } else if (sectionToShowId === 'used-section') {
+        usedSection.classList.remove('hidden');
+        navUsados.classList.add('active');
+        loadUsedItems();
     }
-
-    // Event Listeners para a Navegação
-    navAgendar.addEventListener('click', (e) => {
-        e.preventDefault();
-        navigateToSection('agendamentos-section');
-    });
-
-    navUsados.addEventListener('click', (e) => {
-        e.preventDefault();
-        navigateToSection('used-section');
-    });
-
-    // Inicializa a navegação (Garante a tela correta ao carregar a página)
-    document.addEventListener('DOMContentLoaded', () => {
-        // Inicializa para a tela de Agendamento (que está como 'active' no HTML)
-        navigateToSection('agendamentos-section');
-    });
-    
-} else {
-    console.error("Erro: Elementos de navegação ou seções principais não encontrados no DOM. Verifique as IDs 'nav-schedule', 'nav-used', 'agendamentos-section', 'used-section'.");
 }
 
-async function loadUsedItems() {
-    const usedSection = document.getElementById('used-section');
+// Botões do menu
+navAgendar.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateToSection('agendamentos-section');
+});
+navUsados.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateToSection('used-section');
+});
+
+// Abre inicialmente na aba "Agendar"
+document.addEventListener('DOMContentLoaded', () => {
+    navigateToSection('agendamentos-section');
+});
+
+// Carrega usados (mantive sua função)
+async function loadUsedItems(searchTerm = '') {
     const usedListGrid = document.getElementById('used-list-grid');
-    usedListGrid.innerHTML = ''; // Limpa o conteúdo anterior
+    if (!usedListGrid) return;
+    
+    usedListGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Carregando...</p>';
 
     try {
-        const response = await fetch('/agendamentos');
+        // Se tiver texto digitado, adiciona como parâmetro ?search=
+        const url = searchTerm.trim() !== '' 
+            ? `/agendamentos?search=${encodeURIComponent(searchTerm)}`
+            : '/agendamentos';
+
+        const response = await fetch(url);
         const data = await response.json();
+
+        usedListGrid.innerHTML = '';
 
         if (data.success && data.agendamentos.length > 0) {
             data.agendamentos.forEach(item => {
@@ -433,8 +450,57 @@ async function loadUsedItems() {
         } else {
             usedListGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Nenhum agendamento encontrado.</p>';
         }
+
     } catch (error) {
         console.error('Erro ao carregar itens usados:', error);
         usedListGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Erro ao carregar os dados.</p>';
     }
 }
+
+// ======================================================
+// 🧭 EVENTOS DA BARRA DE PESQUISA
+// ======================================================
+function initSearchBar() {
+    const searchInput = document.getElementById('search-used');
+    const searchButton = document.querySelector('#used-section .search-bar-top button');
+    if (!searchInput || !searchButton) return;
+
+    // Evita adicionar o mesmo evento várias vezes — usa addEventListener mas remove antes
+    searchButton.replaceWith(searchButton.cloneNode(true));
+    const freshSearchButton = document.querySelector('#used-section .search-bar-top button');
+
+    freshSearchButton.addEventListener('click', () => {
+        const searchTerm = searchInput.value.trim();
+        // garante que a aba "Em Uso" esteja visível antes de carregar
+        navigateToSection('used-section');
+        loadUsedItems(searchTerm);
+    });
+
+    // Use 'keydown' para capturar Enter de forma mais confiável
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault();
+            const searchTerm = searchInput.value.trim();
+            // mostra a aba "Em Uso" e pesquisa apenas os resultados relacionados
+            navigateToSection('used-section');
+            loadUsedItems(searchTerm);
+            // Opcional: manter o foco no campo
+            searchInput.focus();
+        }
+    });
+}
+
+// Chama a inicialização ao carregar a página
+window.addEventListener('load', () => {
+    loadProducts();
+    renderCalendar(current);
+    loadUsedItems(); // carrega tudo inicialmente (vazio = lista completa)
+    initSearchBar(); // ativa a barra de pesquisa
+});
+
+// Garante que o initSearchBar seja reativado ao abrir a aba "Em Uso"
+navUsados.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateToSection('used-section');
+    initSearchBar(); // reafirma os listeners
+});
