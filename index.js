@@ -105,6 +105,53 @@ app.get('/equipamentos', async (req, res) => {
     }
 });
 
+app.get('/pendentes', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                a.idAgendamento,
+                a.nomeSolicitante,
+                a.dataHorarioAg,
+                a.dataHorarioDev,
+                e.nomeEquipamento,
+                e.idEquipamentos AS idEquipamento
+            FROM agendamento a
+            JOIN equipamentos e ON a.idEquipamento = e.idEquipamentos
+            WHERE a.dataHorarioDev < NOW()
+            ORDER BY a.dataHorarioDev ASC
+        `;
+        const pendentes = await executePromisified(query);
+        res.json({ success: true, pendentes });
+    } catch (erro) {
+        console.error('Erro ao listar pendentes:', erro);
+        res.status(500).json({ success: false, message: 'Erro ao listar pendentes.' });
+    }
+});
+
+app.get('/agendamentos/pendentes', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                a.idAgendamento,
+                a.nomeSolicitante,
+                a.dataHorarioAg,
+                a.dataHorarioDev,
+                e.nomeEquipamento,
+                e.imagemBase64
+            FROM agendamento a
+            INNER JOIN equipamento e ON a.idEquipamento = e.idEquipamento
+            WHERE a.dataHorarioDev < NOW()
+        `;
+
+        const results = await executePromisified(query);
+
+        res.json({ success: true, pendentes: results });
+    } catch (erro) {
+        console.error('Erro ao buscar equipamentos pendentes:', erro);
+        res.status(500).json({ success: false, message: 'Erro ao buscar equipamentos pendentes.' });
+    }
+});
+
 // ======================================================================
 // ROTA: RETORNAR IMAGEM DE EQUIPAMENTO
 // ======================================================================

@@ -19,7 +19,7 @@
         <nav class="main-nav">
             <a href="#" id="nav-used" class="nav-item">Em Uso</a>
             <a href="#" id="nav-schedule" class="nav-item active">Agendar</a>
-            <a href="#" class="nav-item">Pendentes</a>
+            <a href="#" id="nav-pendentes" class="nav-item">Pendentes</a>
             <a href="#" class="nav-item">Relatórios</a>
         </nav>
       
@@ -46,6 +46,21 @@
                 <!-- O JavaScript vai preencher com os cards dos agendamentos -->
             </div>
         </section>
+
+        <section id="pendentes-section" class="hidden">
+    <h2><i class="fas fa-exclamation-triangle"></i> Pendentes de Devolução</h2>
+
+    <div class="search-section">
+        <div class="search-bar-top">
+            <input type="text" id="search-pendentes" placeholder="Pesquisar solicitante ou equipamento...">
+            <button><i class="fas fa-search"></i></button>
+        </div>
+    </div>
+
+    <div id="pendentes-list-grid" class="products-grid">
+        <!-- Cards preenchidos via JavaScript -->
+    </div>
+</section>
     
         <!-- ======== ABA AGENDAR ======== -->
         <section id="agendamentos-section">

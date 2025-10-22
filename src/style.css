@@ -784,3 +784,10 @@ body {
         padding: 20px;
     }
 }
+
+#pendentes-section .product-card.used-card {
+    border: 1px solid #C62828;
+}
+#pendentes-section .product-name {
+    color: #C62828;
+}

@@ -1,8 +1,3 @@
-// -----------------------------
-// script.js (ATUALIZADO)
-// -----------------------------
-
-// VARIÁVEIS GLOBAIS PARA RASTREAR A SELEÇÃO
 let selectedEquipamentoId = null;
 let selectedEquipamentoNome = null;
 let selectedDate = null;
@@ -367,17 +362,19 @@ agendamentoForm?.addEventListener('submit', async (e) => {
 // -------------------------
 const navAgendar = document.getElementById('nav-schedule');
 const navUsados = document.getElementById('nav-used');
+const navPendentes = document.getElementById('nav-pendentes');
+const pendentesSection = document.getElementById('pendentes-section');
 const agendamentosSection = document.getElementById('agendamentos-section');
 const usedSection = document.getElementById('used-section');
 
 function navigateToSection(sectionToShowId) {
-    // Esconde ambas as seções
     agendamentosSection.classList.add('hidden');
     usedSection.classList.add('hidden');
+    pendentesSection.classList.add('hidden');
     navAgendar.classList.remove('active');
     navUsados.classList.remove('active');
+    navPendentes.classList.remove('active');
 
-    // Mostra a seção clicada
     if (sectionToShowId === 'agendamentos-section') {
         agendamentosSection.classList.remove('hidden');
         navAgendar.classList.add('active');
@@ -386,9 +383,18 @@ function navigateToSection(sectionToShowId) {
         usedSection.classList.remove('hidden');
         navUsados.classList.add('active');
         loadUsedItems();
+    } else if (sectionToShowId === 'pendentes-section') {
+        pendentesSection.classList.remove('hidden');
+        navPendentes.classList.add('active');
+        loadPendentes();
     }
 }
 
+// Evento do botão Pendentes
+navPendentes.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateToSection('pendentes-section');
+});
 // Botões do menu
 navAgendar.addEventListener('click', (e) => {
     e.preventDefault();
@@ -490,6 +496,24 @@ function initSearchBar() {
     });
 }
 
+function initPendentesSearch() {
+    const searchInput = document.getElementById('search-pendentes');
+    const searchButton = document.querySelector('#pendentes-section .search-bar-top button');
+    if (!searchInput || !searchButton) return;
+
+    searchButton.addEventListener('click', () => {
+        const term = searchInput.value.trim();
+        loadPendentes(term);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            loadPendentes(searchInput.value.trim());
+        }
+    });
+}
+
 // Chama a inicialização ao carregar a página
 window.addEventListener('load', () => {
     loadProducts();
@@ -503,4 +527,51 @@ navUsados.addEventListener('click', (e) => {
     e.preventDefault();
     navigateToSection('used-section');
     initSearchBar(); // reafirma os listeners
+    initPendentesSearch();
 });
+
+async function loadPendentes(searchTerm = '') {
+    const pendentesGrid = document.getElementById('pendentes-list-grid');
+    if (!pendentesGrid) return;
+
+    pendentesGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Carregando...</p>';
+
+    try {
+        const url = searchTerm.trim() !== ''
+            ? `/pendentes?search=${encodeURIComponent(searchTerm)}`
+            : '/pendentes';
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        pendentesGrid.innerHTML = '';
+
+        if (data.success && data.pendentes.length > 0) {
+            data.pendentes.forEach(item => {
+                const card = `
+                    <div class="product-card used-card">
+                        <div class="product-image-container">
+                            <img class="product-image" src="/equipamento/imagem/${item.idEquipamento}" alt="${item.nomeEquipamento}">
+                        </div>
+                        <div class="product-name">${item.nomeEquipamento}</div>
+                        <div class="product-meta">
+                            <span class="user-name"><i class="fas fa-user"></i> ${item.nomeSolicitante}</span>
+                        </div>
+                        <div class="product-meta">
+                            <span class="days-indicator" style="background-color: #C62828;">
+                                <i class="fas fa-clock"></i> Devolução prevista: ${new Date(item.dataHorarioDev).toLocaleString('pt-BR')}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                pendentesGrid.insertAdjacentHTML('beforeend', card);
+            });
+        } else {
+            pendentesGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Nenhum pendente encontrado.</p>';
+        }
+
+    } catch (error) {
+        console.error('Erro ao carregar pendentes:', error);
+        pendentesGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Erro ao carregar os dados.</p>';
+    }
+}
