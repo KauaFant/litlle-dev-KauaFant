@@ -246,6 +246,39 @@ app.post('/agendamento/novo', async (req, res) => {
     }
 });
 
+app.get('/relatorios', async (req, res) => {
+    try {
+        const search = req.query.search ? `%${req.query.search}%` : '%';
+
+        const query = `
+            SELECT 
+                a.idAgendamento,
+                e.nomeEquipamento,
+                e.fornecedor,
+                a.nomeSolicitante,
+                a.dataHorarioAg,
+                a.dataHorarioDev,
+                d.nomeDevolvedor,
+                d.dataDev,
+                d.condicao
+            FROM agendamento a
+            INNER JOIN equipamentos e ON a.idEquipamento = e.idEquipamentos
+            LEFT JOIN devolucao d ON d.idEquipamento = e.idEquipamentos
+            WHERE e.nomeEquipamento LIKE ? 
+               OR a.nomeSolicitante LIKE ?
+               OR IFNULL(d.nomeDevolvedor, '') LIKE ?
+            ORDER BY a.dataHorarioAg DESC
+        `;
+
+        const results = await executePromisified(query, [search, search, search]);
+        res.json({ success: true, relatorios: results });
+
+    } catch (erro) {
+        console.error('Erro ao gerar relatório:', erro);
+        res.status(500).json({ success: false, message: 'Erro interno ao gerar relatório.' });
+    }
+});
+
 // ======================================================================
 // ROTA PRINCIPAL (frontend)
 // ======================================================================

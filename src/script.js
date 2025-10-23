@@ -514,14 +514,6 @@ function initPendentesSearch() {
     });
 }
 
-// Chama a inicialização ao carregar a página
-window.addEventListener('load', () => {
-    loadProducts();
-    renderCalendar(current);
-    loadUsedItems(); // carrega tudo inicialmente (vazio = lista completa)
-    initSearchBar(); // ativa a barra de pesquisa
-});
-
 // Garante que o initSearchBar seja reativado ao abrir a aba "Em Uso"
 navUsados.addEventListener('click', (e) => {
     e.preventDefault();
@@ -575,3 +567,133 @@ async function loadPendentes(searchTerm = '') {
         pendentesGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Erro ao carregar os dados.</p>';
     }
 }
+
+const navRelatorios = document.querySelector('.main-nav a[href="#"]').nextElementSibling; // ou mais seguro:
+const navRelatoriosItem = document.querySelectorAll('.main-nav .nav-item')[3]; // quarto item
+const relatoriosSection = document.getElementById('relatorios-section');
+
+function navigateToSection(sectionToShowId) {
+    agendamentosSection.classList.add('hidden');
+    usedSection.classList.add('hidden');
+    pendentesSection.classList.add('hidden');
+    relatoriosSection.classList.add('hidden');
+
+    navAgendar.classList.remove('active');
+    navUsados.classList.remove('active');
+    navPendentes.classList.remove('active');
+    navRelatoriosItem.classList.remove('active');
+
+    if (sectionToShowId === 'agendamentos-section') {
+        agendamentosSection.classList.remove('hidden');
+        navAgendar.classList.add('active');
+        renderCalendar(current);
+    } else if (sectionToShowId === 'used-section') {
+        usedSection.classList.remove('hidden');
+        navUsados.classList.add('active');
+        loadUsedItems();
+    } else if (sectionToShowId === 'pendentes-section') {
+        pendentesSection.classList.remove('hidden');
+        navPendentes.classList.add('active');
+        loadPendentes();
+    } else if (sectionToShowId === 'relatorios-section') {
+        relatoriosSection.classList.remove('hidden');
+        navRelatoriosItem.classList.add('active');
+        loadRelatorios();
+    }
+}
+
+navRelatoriosItem.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateToSection('relatorios-section');
+});
+
+async function loadRelatorios(searchTerm = '') {
+    const relatoriosGrid = document.getElementById('relatorios-list-grid');
+    if (!relatoriosGrid) return;
+
+    relatoriosGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Carregando...</p>';
+
+    try {
+        const url = searchTerm.trim() !== ''
+            ? `/relatorios?search=${encodeURIComponent(searchTerm)}`
+            : '/relatorios';
+
+        const response = await fetch(url);
+        const data = await response.json();
+        relatoriosGrid.innerHTML = '';
+
+        if (data.success && data.relatorios.length > 0) {
+            data.relatorios.forEach(item => {
+                const devolucaoInfo = item.dataDev
+                    ? `<div class="product-meta">
+                           <span class="days-indicator" style="background-color: #388E3C;">
+                               <i class="fas fa-undo"></i> Devolvido em: ${new Date(item.dataDev).toLocaleString('pt-BR')} (${item.condicao})
+                           </span>
+                       </div>`
+                    : `<div class="product-meta">
+                           <span class="days-indicator" style="background-color: #C62828;">
+                               <i class="fas fa-clock"></i> Ainda não devolvido
+                           </span>
+                       </div>`;
+
+                const card = `
+                    <div class="product-card used-card">
+                        <div class="product-name">${item.nomeEquipamento}</div>
+                        <div class="product-meta">
+                            <span class="user-name"><i class="fas fa-user"></i> Solicitante: ${item.nomeSolicitante}</span>
+                        </div>
+                        <div class="product-meta">
+                            <span class="days-indicator" style="background-color: var(--medium-blue);">
+                                <i class="fas fa-calendar-plus"></i> Retirada: ${new Date(item.dataHorarioAg).toLocaleString('pt-BR')}
+                            </span>
+                        </div>
+                        <div class="product-meta">
+                            <span class="days-indicator" style="background-color: var(--dark-blue);">
+                                <i class="fas fa-calendar-check"></i> Devolução Prevista: ${new Date(item.dataHorarioDev).toLocaleString('pt-BR')}
+                            </span>
+                        </div>
+                        ${devolucaoInfo}
+                        <div class="product-meta">
+                            <span class="days-indicator" style="background-color: #555;">
+                                <i class="fas fa-industry"></i> Fornecedor: ${item.fornecedor}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                relatoriosGrid.insertAdjacentHTML('beforeend', card);
+            });
+        } else {
+            relatoriosGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Nenhum registro encontrado.</p>';
+        }
+    } catch (error) {
+        console.error('Erro ao carregar relatórios:', error);
+        relatoriosGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Erro ao carregar relatórios.</p>';
+    }
+}
+
+function initRelatoriosSearch() {
+    const searchInput = document.getElementById('search-relatorios');
+    const searchButton = document.querySelector('#relatorios-section .search-bar-top button');
+    if (!searchInput || !searchButton) return;
+
+    searchButton.addEventListener('click', () => {
+        loadRelatorios(searchInput.value.trim());
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            loadRelatorios(searchInput.value.trim());
+        }
+    });
+}
+
+// Chama a inicialização ao carregar a página
+window.addEventListener('load', () => {
+    loadProducts();
+    renderCalendar(current);
+    loadUsedItems();
+    initSearchBar();
+    initPendentesSearch();
+    initRelatoriosSearch();
+});
