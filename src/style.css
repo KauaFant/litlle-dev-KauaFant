@@ -1,5 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap');
 
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Utilitários */
+.hidden {
+    display: none !important;
+}
+.visible {
+    /* Força a visibilidade, mas a regra .modal-overlay.visible é mais específica */
+    display: flex !important; 
+}
+
 html, body {
     height: 100%;
     /* Garante que a altura da página seja igual à altura da viewport */
@@ -763,20 +777,6 @@ body {
     box-sizing: border-box; /* Inclui padding e border na largura total */
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Utilitários */
-.hidden {
-    display: none !important;
-}
-.visible {
-    /* Força a visibilidade, mas a regra .modal-overlay.visible é mais específica */
-    display: flex !important; 
-}
-
 /* Ajuste para telas menores */
 @media (max-width: 650px) {
     .modal-content.cadastro-content {
@@ -790,4 +790,122 @@ body {
 }
 #pendentes-section .product-name {
     color: #C62828;
+}
+/* ========================================================== */
+/* RELATÓRIOS */
+/* ========================================================== */
+
+/* Estilo geral para a seção de relatórios */
+
+#relatorios-section {
+    animation: fadeIn 0.3s ease-in; /* Reutiliza a animação de fade-in */
+    padding-bottom: 50px; /* Espaço inferior */
+}
+
+/* Estiliza o botão de download de PDF */
+#btn-download-pdf {
+    display: block;
+    width: 280px;
+    margin: 30px auto 0;
+    padding: 15px 20px;
+    background-color: var(--dark-blue); /* Azul escuro principal */
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 10px var(--shadow-light);
+}
+
+#btn-download-pdf:hover {
+    background-color: var(--main-blue); /* Azul principal no hover */
+    box-shadow: 0 6px 15px var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+#btn-download-pdf i {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+/* Estilo simplificado para o card de relatório */
+.product-card.relatorio-card {
+    /* Base do card de produto */
+    background-color: var(--white); /* Fundo branco para destaque */
+    border: 1px solid var(--border-gray);
+    box-shadow: 0 2px 5px var(--shadow-light);
+    padding: 20px;
+    height: 320px; /* Altura fixa para uniformidade */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around; /* Distribui o conteúdo verticalmente */
+    text-align: center;
+}
+
+.product-card.relatorio-card:hover {
+    box-shadow: 0 4px 12px var(--shadow-hover);
+    transform: translateY(-3px);
+}
+
+.product-card.relatorio-card .product-name {
+    /* Nome do Equipamento */
+    font-size: 1.1em;
+    color: var(--main-blue);
+    margin-bottom: 5px;
+}
+
+.product-card.relatorio-card .product-image-container {
+    /* Container da Imagem */
+    height: 120px; /* Altura dedicada para a imagem */
+    margin-bottom: 15px;
+}
+
+.product-card.relatorio-card .product-image {
+    /* Imagem */
+    width: 90%;
+    max-height: 100%;
+    border: 1px solid var(--gray-card);
+}
+
+.product-card.relatorio-card .product-meta {
+    /* Meta-informações (como o nome do solicitante) */
+    border-top: none; /* Remove a borda divisória */
+    padding-top: 0;
+    margin-top: 5px;
+    display: block; /* Garante que o span ocupe a linha toda */
+}
+
+.product-card.relatorio-card .user-name {
+    /* Nome do Solicitante */
+    font-size: 0.9em;
+    color: var(--text-dark);
+    font-weight: 300;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    padding: 5px 10px;
+    background-color: var(--gray-bg);
+    display: inline-block;
+}
+
+.product-card.relatorio-card .user-name i {
+    margin-right: 5px;
+    color: var(--dark-blue);
+}
+
+/* Esconde as outras informações meta que não foram solicitadas no novo layout */
+.product-card.relatorio-card .days-indicator {
+    display: none !important;
+}
+
+/* Estilo específico para o solicitante e o fornecedor */
+.product-card.relatorio-card .product-meta:nth-last-child(2), /* Solicitante */
+.product-card.relatorio-card .product-meta:last-child { /* Fornecedor (escondido no novo layout) */
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-gray);
+}
+.product-card.relatorio-card .product-meta:nth-last-child(2) {
+    border-top: none; /* Remove a borda do solicitante */
 }

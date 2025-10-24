@@ -265,17 +265,155 @@ app.get('/relatorios', async (req, res) => {
             INNER JOIN equipamentos e ON a.idEquipamento = e.idEquipamentos
             LEFT JOIN devolucao d ON d.idEquipamento = e.idEquipamentos
             WHERE e.nomeEquipamento LIKE ? 
-               OR a.nomeSolicitante LIKE ?
+               OR a.nomeSolicitante LIKE ? 
                OR IFNULL(d.nomeDevolvedor, '') LIKE ?
             ORDER BY a.dataHorarioAg DESC
         `;
 
         const results = await executePromisified(query, [search, search, search]);
         res.json({ success: true, relatorios: results });
-
     } catch (erro) {
         console.error('Erro ao gerar relatório:', erro);
         res.status(500).json({ success: false, message: 'Erro interno ao gerar relatório.' });
+    }
+});
+
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+
+app.get('/relatorios/pdf', async (req, res) => {
+    try {
+        const { tipo, mes, ano } = req.query;
+
+        // Monta o filtro SQL conforme o tipo de relatório
+        let query = `
+            SELECT 
+                a.idAgendamento,
+                e.nomeEquipamento,
+                e.fornecedor,
+                a.nomeSolicitante,
+                a.dataHorarioAg,
+                a.dataHorarioDev,
+                d.nomeDevolvedor,
+                d.dataDev,
+                d.condicao
+            FROM agendamento a
+            INNER JOIN equipamentos e ON a.idEquipamento = e.idEquipamentos
+            LEFT JOIN devolucao d ON d.idEquipamento = e.idEquipamentos
+        `;
+
+        const params = [];
+
+        // Filtro mensal
+        if (tipo === 'mensal' && mes && ano) {
+            query += ' WHERE MONTH(a.dataHorarioAg) = ? AND YEAR(a.dataHorarioAg) = ?';
+            params.push(mes, ano);
+        }
+
+        // Filtro anual
+        else if (tipo === 'anual' && ano) {
+            query += ' WHERE YEAR(a.dataHorarioAg) = ?';
+            params.push(ano);
+        }
+
+        query += ' ORDER BY a.dataHorarioAg DESC';
+
+        // Executa consulta filtrada
+        const relatorios = await executePromisified(query, params);
+
+        // Geração do PDF
+        const doc = new PDFDocument({ margin: 40, size: 'A4' });
+        const fileName = `relatorio-${tipo || 'geral'}-${ano || 'todos'}${mes ? '-' + mes : ''}.pdf`;
+        const filePath = path.join(__dirname, fileName);
+        const writeStream = fs.createWriteStream(filePath);
+        doc.pipe(writeStream);
+
+        // Título e cabeçalho
+        doc
+            .fontSize(18)
+            .fillColor('#16429F')
+            .text('Relatório de Agendamentos SENAI / FIEP', { align: 'center' })
+            .moveDown(0.5)
+            .fontSize(12)
+            .fillColor('#000000')
+            .text(
+                tipo === 'mensal'
+                    ? `Período: ${mes}/${ano}`
+                    : tipo === 'anual'
+                        ? `Ano: ${ano}`
+                        : 'Relatório Geral',
+                { align: 'center' }
+            )
+            .moveDown(1.5);
+
+        // Cabeçalho da tabela
+        const headerY = doc.y + 10;
+        doc
+            .fontSize(12)
+            .fillColor('#16429F')
+            .rect(40, headerY, 515, 25)
+            .fill('#16429F');
+
+        doc
+            .fillColor('#FFFFFF')
+            .text('Equipamento', 45, headerY + 6)
+            .text('Solicitante', 165, headerY + 6)
+            .text('Retirada', 285, headerY + 6)
+            .text('Devolução', 385, headerY + 6)
+            .text('Status', 485, headerY + 6);
+
+        doc.moveDown(2);
+
+        // Preenche as linhas
+        relatorios.forEach((item, i) => {
+            const status = item.dataDev
+                ? 'Devolvido'
+                : new Date(item.dataHorarioDev) < new Date()
+                    ? 'Pendente'
+                    : 'Em uso';
+
+            const bgColor = i % 2 === 0 ? '#E8ECF3' : '#FFFFFF';
+            const y = doc.y;
+
+            doc
+                .rect(40, y - 3, 515, 22)
+                .fill(bgColor)
+                .fillColor('#000000')
+                .fontSize(10)
+                .text(item.nomeEquipamento, 45, y)
+                .text(item.nomeSolicitante, 165, y)
+                .text(new Date(item.dataHorarioAg).toLocaleDateString('pt-BR'), 285, y)
+                .text(new Date(item.dataHorarioDev).toLocaleDateString('pt-BR'), 385, y);
+
+            // Cor por status
+            let color = '#000';
+            if (status === 'Pendente') color = '#C62828';
+            if (status === 'Em uso') color = '#1565C0';
+            if (status === 'Devolvido') color = '#2E7D32';
+
+            doc.fillColor(color).text(status, 485, y);
+            doc.fillColor('#000000');
+            doc.moveDown(1);
+        });
+
+        // Mensagem se não houver registros
+        if (relatorios.length === 0) {
+            doc.moveDown(2);
+            doc.fontSize(12).fillColor('#C62828').text('Nenhum registro encontrado para o período selecionado.', { align: 'center' });
+        }
+
+        doc.end();
+
+        // Finaliza e envia o PDF
+        writeStream.on('finish', () => {
+            res.download(filePath, fileName, (err) => {
+                if (err) console.error('Erro ao enviar PDF:', err);
+                fs.unlinkSync(filePath);
+            });
+        });
+    } catch (erro) {
+        console.error('Erro ao gerar PDF:', erro);
+        res.status(500).json({ success: false, message: 'Erro ao gerar o relatório em PDF.' });
     }
 });
 

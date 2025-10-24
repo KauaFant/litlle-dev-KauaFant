@@ -58,6 +58,7 @@ const calendarGridEl = document.getElementById('calendar-grid');
 const monthTitleEl = document.getElementById('month-title');
 const prevBtn = document.getElementById('prev-month');
 const nextBtn = document.getElementById('next-month');
+const dataDevolucaoInput = document.getElementById('dataDevolucao');
 
 function renderCalendar(dateObj) {
     // Limpa grid
@@ -275,34 +276,55 @@ const closeAgendamentoModalBtn = document.getElementById('close-agendamento-moda
 const agendamentoForm = document.getElementById('agendamento-form');
 
 function openAgendamentoModal() {
-    const equipamentoCard = document.querySelector(`.product-item-card[data-id="${selectedEquipamentoId}"]`);
-    const equipamentoNome = equipamentoCard ? equipamentoCard.querySelector('.product-item-name').textContent : 'N/A';
+    if (!selectedEquipamentoId || !selectedDate) {
+        alert('Por favor, selecione um equipamento e uma data de retirada primeiro!');
+        return;
+    }
 
-    document.getElementById('modal-equipamento-nome').textContent = equipamentoNome;
-    // modal espera algo tipo DD/MM/YYYY, mas deixo o ISO para precisão
-    document.getElementById('modal-data-retirada').textContent = selectedDate || 'N/A';
+    const retiradaDate = selectedDate; // Formato YYYY-MM-DD
 
-    agendamentoModal.classList.add('visible');
+    // 1. DEFINE A RESTRIÇÃO: A data mínima de devolução é a data de retirada.
+    if (dataDevolucaoInput) {
+        dataDevolucaoInput.setAttribute('min', retiradaDate);
+        
+        // Opcional: Se o valor atual for menor que a data de retirada,
+        // força o valor para ser a data de retirada para evitar erro inicial.
+        if (dataDevolucaoInput.value && dataDevolucaoInput.value < retiradaDate) {
+             dataDevolucaoInput.value = retiradaDate;
+        } else if (!dataDevolucaoInput.value) {
+            // Define a data de retirada como padrão para devolução (se não houver valor)
+            dataDevolucaoInput.value = retiradaDate;
+        }
+    }
+
+    // 2. Atualiza os dados de exibição no modal (opcional, mas recomendado)
+    const equipamentoSpan = agendamentoModal?.querySelector('#modal-equipamento-nome');
+    const dataRetiradaSpan = agendamentoModal?.querySelector('#modal-data-retirada');
+    
+    // Supondo que você tem esses elementos no seu HTML
+    if (equipamentoSpan) equipamentoSpan.textContent = selectedEquipamentoNome;
+    if (dataRetiradaSpan) dataRetiradaSpan.textContent = new Date(retiradaDate).toLocaleDateString('pt-BR');
+
+    // 3. Exibe o modal
+    agendamentoModal?.classList.add('visible');
 }
 
-if (confirmButton) {
-    confirmButton.addEventListener('click', (e) => {
-        // caso o botão seja o da página principal (id open-agendamento-btn) ou .confirm-btn
-        if (confirmButton.disabled) return;
+function closeAgendamentoModal() {
+    agendamentoModal?.classList.remove('visible');
+}
+
+// Lógica para abrir o modal quando o botão "Agendar" é clicado
+confirmButton?.addEventListener('click', (e) => {
+    // A função 'updateConfirmButtonState' deve garantir que o botão só é habilitado
+    // se selectedEquipamentoId e selectedDate estiverem preenchidos
+    if (!confirmButton.disabled) {
+        e.preventDefault();
         openAgendamentoModal();
-    });
-}
-
-closeAgendamentoModalBtn?.addEventListener('click', () => {
-    agendamentoModal.classList.remove('visible');
-    agendamentoForm?.reset();
-});
-agendamentoModal?.addEventListener('click', (e) => {
-    if (e.target === agendamentoModal) {
-        agendamentoModal.classList.remove('visible');
-        agendamentoForm?.reset();
     }
 });
+
+// Lógica para fechar o modal
+closeAgendamentoModalBtn?.addEventListener('click', closeAgendamentoModal);
 
 // Submissão do formulário de agendamento (mantive a construção dos dados)
 agendamentoForm?.addEventListener('submit', async (e) => {
@@ -624,41 +646,18 @@ async function loadRelatorios(searchTerm = '') {
 
         if (data.success && data.relatorios.length > 0) {
             data.relatorios.forEach(item => {
-                const devolucaoInfo = item.dataDev
-                    ? `<div class="product-meta">
-                           <span class="days-indicator" style="background-color: #388E3C;">
-                               <i class="fas fa-undo"></i> Devolvido em: ${new Date(item.dataDev).toLocaleString('pt-BR')} (${item.condicao})
-                           </span>
-                       </div>`
-                    : `<div class="product-meta">
-                           <span class="days-indicator" style="background-color: #C62828;">
-                               <i class="fas fa-clock"></i> Ainda não devolvido
-                           </span>
-                       </div>`;
-
+                // Removemos todas as informações de data e status, mantendo apenas:
+                // Imagem, Nome do Equipamento e Nome do Solicitante.
                 const card = `
-                    <div class="product-card used-card">
+                    <div class="product-card relatorio-card">
+                        <div class="product-image-container">
+                            <img class="product-image" src="/equipamento/imagem/${item.idEquipamento}" alt="${item.nomeEquipamento}">
+                        </div>
                         <div class="product-name">${item.nomeEquipamento}</div>
                         <div class="product-meta">
-                            <span class="user-name"><i class="fas fa-user"></i> Solicitante: ${item.nomeSolicitante}</span>
+                            <span class="user-name"><i class="fas fa-user"></i> ${item.nomeSolicitante}</span>
                         </div>
-                        <div class="product-meta">
-                            <span class="days-indicator" style="background-color: var(--medium-blue);">
-                                <i class="fas fa-calendar-plus"></i> Retirada: ${new Date(item.dataHorarioAg).toLocaleString('pt-BR')}
-                            </span>
                         </div>
-                        <div class="product-meta">
-                            <span class="days-indicator" style="background-color: var(--dark-blue);">
-                                <i class="fas fa-calendar-check"></i> Devolução Prevista: ${new Date(item.dataHorarioDev).toLocaleString('pt-BR')}
-                            </span>
-                        </div>
-                        ${devolucaoInfo}
-                        <div class="product-meta">
-                            <span class="days-indicator" style="background-color: #555;">
-                                <i class="fas fa-industry"></i> Fornecedor: ${item.fornecedor}
-                            </span>
-                        </div>
-                    </div>
                 `;
                 relatoriosGrid.insertAdjacentHTML('beforeend', card);
             });
@@ -696,4 +695,69 @@ window.addEventListener('load', () => {
     initSearchBar();
     initPendentesSearch();
     initRelatoriosSearch();
+});
+
+const relatorioModal = document.getElementById('relatorio-modal');
+const btnDownloadPDF = document.getElementById('btn-download-pdf');
+const cancelarRelatorioBtn = document.getElementById('cancelar-relatorio');
+const relatorioForm = document.getElementById('relatorio-form');
+const mensalFields = document.getElementById('mensal-fields');
+const anoField = document.getElementById('ano-field');
+
+// 1️⃣ Abrir modal ao clicar no botão (sem baixar nada)
+btnDownloadPDF.addEventListener('click', () => {
+  relatorioModal.classList.add('visible');
+});
+
+// 2️⃣ Fechar modal
+cancelarRelatorioBtn.addEventListener('click', () => {
+  relatorioModal.classList.remove('visible');
+});
+
+// 3️⃣ Mostrar/ocultar campos conforme seleção
+relatorioForm.addEventListener('change', () => {
+  const tipo = relatorioForm.tipoRelatorio.value;
+  if (tipo === 'mensal') {
+    mensalFields.classList.remove('hidden');
+    anoField.classList.remove('hidden');
+  } else if (tipo === 'anual') {
+    mensalFields.classList.add('hidden');
+    anoField.classList.remove('hidden');
+  }
+});
+
+// 4️⃣ Baixar PDF apenas após confirmação
+relatorioForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const tipo = relatorioForm.tipoRelatorio.value;
+  const mes = document.getElementById('mesSelecionado').value;
+  const ano = document.getElementById('anoSelecionado').value;
+
+  if (!tipo) {
+    alert('Selecione se deseja relatório mensal ou anual.');
+    return;
+  }
+
+  let url = '/relatorios/pdf';
+  if (tipo === 'mensal') {
+    url += `?tipo=mensal&mes=${mes}&ano=${ano}`;
+  } else {
+    url += `?tipo=anual&ano=${ano}`;
+  }
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Erro ao gerar PDF.');
+
+    const blob = await response.blob();
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `relatorio-${tipo}-${ano}${tipo === 'mensal' ? '-' + mes : ''}.pdf`;
+    link.click();
+  } catch (err) {
+    alert('Falha ao gerar o PDF.');
+    console.error(err);
+  }
+
+  relatorioModal.classList.remove('visible');
 });
