@@ -19,7 +19,31 @@ document.getElementById('cadastro-form')?.addEventListener('submit', async (e) =
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
+    const fileInput = form.elements['imagemEquipamento'];
+    const file = fileInput.files[0];
+
+    // --- 🔒 Validação: aceitar apenas imagens ---
+    if (!file || !file.type.startsWith('image/')) {
+        alert('Por favor, selecione um arquivo de imagem válido (JPEG, PNG, etc).');
+        return;
+    }
+
+    // --- 🔒 Validação: campos de texto não podem ser só espaços ---
+    const fornecedor = form.elements['fornecedor'].value.trim();
+    const nomeEquipamento = form.elements['nomeEquipamento'].value.trim();
+    const descricao = form.elements['descricao'].value.trim();
+
+    if (!fornecedor || !nomeEquipamento || !descricao) {
+        alert('Por favor, preencha todos os campos de texto corretamente.');
+        return;
+    }
+
+    formData.set('fornecedor', fornecedor);
+    formData.set('nomeEquipamento', nomeEquipamento);
+    formData.set('descricao', descricao);
     formData.set('altoValor', form.elements['altoValor'].checked ? 1 : 0);
+
+    // prossegue com o envio original
     try {
         const response = await fetch('/equipamento/cadastro', {
             method: 'POST',
@@ -152,6 +176,19 @@ function addCalendarSelectionLogic() {
 
     freshDays.forEach(day => {
         day.addEventListener('click', () => {
+            const fullDate = day.dataset.fullDate;
+            const today = new Date().toISOString().split('T')[0]; // formato YYYY-MM-DD
+    
+            // --- 🔒 Bloqueia dias anteriores ao atual ---
+            if (fullDate < today) {
+                alert('Não é possível agendar em uma data anterior ao dia atual.');
+                return;
+            }
+    
+            if (!selectedEquipamentoId) {
+                alert('Por favor, selecione um equipamento primeiro!');
+                return;
+            }
             if (!selectedEquipamentoId) {
                 alert('Por favor, selecione um equipamento primeiro!');
                 return;
@@ -409,6 +446,11 @@ function navigateToSection(sectionToShowId) {
         pendentesSection.classList.remove('hidden');
         navPendentes.classList.add('active');
         loadPendentes();
+    }
+    if (sectionToShowId === 'used-section') {
+        initSearchBar();
+    } else if (sectionToShowId === 'pendentes-section') {
+        initPendentesSearch();
     }
 }
 
@@ -760,4 +802,85 @@ relatorioForm.addEventListener('submit', async (e) => {
   }
 
   relatorioModal.classList.remove('visible');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializa as barras de pesquisa de cada aba
+    initSearchBar();        // "Em Uso"
+    initPendentesSearch();  // "Pendentes"
+});
+
+const excluirModal = document.getElementById('excluir-modal');
+const openExcluirBtn = document.getElementById('open-excluir-modal');
+const closeExcluirBtn = document.getElementById('close-excluir-modal');
+const excluirForm = document.getElementById('excluir-form');
+const selectExcluir = document.getElementById('equipamentoExcluir');
+
+openExcluirBtn?.addEventListener('click', async () => {
+    excluirModal.classList.add('visible');
+    const response = await fetch('/equipamentos');
+    const data = await response.json();
+    console.log('equipamentos para exclusão:', data);
+
+    // Carrega os equipamentos disponíveis
+    try {
+        const response = await fetch('/equipamentos');
+        const data = await response.json();
+
+        selectExcluir.innerHTML = '';
+
+        if (data.success && data.equipamentos.length > 0) {
+            data.equipamentos.forEach(eq => {
+                const option = document.createElement('option');
+                option.value = eq.idEquipamentos;
+                option.textContent = eq.nomeEquipamento;
+                selectExcluir.appendChild(option);
+            });
+        } else {
+            const opt = document.createElement('option');
+            opt.textContent = 'Nenhum equipamento cadastrado.';
+            opt.disabled = true;
+            selectExcluir.appendChild(opt);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar equipamentos:', error);
+        alert('Erro ao carregar lista de equipamentos.');
+    }
+});
+
+closeExcluirBtn?.addEventListener('click', () => {
+    excluirModal.classList.remove('visible');
+});
+
+excluirForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = selectExcluir.value;
+    if (!id) {
+        alert('Selecione um equipamento para excluir.');
+        return;
+    }
+
+    if (!confirm('Tem certeza que deseja excluir este equipamento? Esta ação é irreversível.')) return;
+
+    try {
+        const resp = await fetch(`/equipamento/${id}`, { method: 'DELETE' });
+
+        // Tenta parsear JSON (se houver)
+        let data;
+        try { data = await resp.json(); } catch (_) { data = null; }
+
+        if (resp.ok) {
+            alert((data && data.message) ? data.message : 'Equipamento excluído com sucesso!');
+            excluirModal.classList.remove('visible');
+            await loadProducts();
+        } else {
+            // Mostra mensagem útil ao usuário
+            const msg = (data && data.message) ? data.message : `Erro ao excluir (status ${resp.status})`;
+            alert(msg);
+            console.error('Resposta exclusão:', resp.status, data);
+        }
+    } catch (error) {
+        console.error('Erro ao comunicar com o servidor durante exclusão:', error);
+        alert('Erro de comunicação com o servidor. Veja o console para detalhes.');
+    }
 });

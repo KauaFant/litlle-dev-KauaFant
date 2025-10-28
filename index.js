@@ -26,31 +26,6 @@ function executePromisified(sql, values) {
     });
 }
 
-// ======================================================================
-// ROTA: CADASTRAR NOVO EQUIPAMENTO
-// ======================================================================
-app.get('/agendamentos', async (req, res) => {
-    try {
-        const query = `
-            SELECT 
-                a.idAgendamento,
-                a.nomeSolicitante,
-                a.dataHorarioAg,
-                a.dataHorarioDev,
-                e.nomeEquipamento,
-                e.idEquipamentos AS idEquipamento
-            FROM agendamento a
-            JOIN equipamentos e ON a.idEquipamento = e.idEquipamentos
-            ORDER BY a.dataHorarioAg DESC
-        `;
-        const agendamentos = await executePromisified(query);
-        res.json({ success: true, agendamentos });
-    } catch (erro) {
-        console.error('Erro ao listar agendamentos:', erro);
-        res.status(500).json({ success: false, message: 'Erro ao listar agendamentos.' });
-    }
-});
-
 app.post('/equipamento/cadastro', upload.single('imagemEquipamento'), async (req, res) => {
     const file = req.file;
     const { fornecedor, nomeEquipamento, descricao, altoValor } = req.body;
@@ -106,8 +81,10 @@ app.get('/equipamentos', async (req, res) => {
 });
 
 app.get('/pendentes', async (req, res) => {
+    const search = req.query.search || ''; // termo digitado na barra
+
     try {
-        const query = `
+        let query = `
             SELECT 
                 a.idAgendamento,
                 a.nomeSolicitante,
@@ -118,9 +95,21 @@ app.get('/pendentes', async (req, res) => {
             FROM agendamento a
             JOIN equipamentos e ON a.idEquipamento = e.idEquipamentos
             WHERE a.dataHorarioDev < NOW()
-            ORDER BY a.dataHorarioDev ASC
         `;
-        const pendentes = await executePromisified(query);
+        const values = [];
+
+        if (search.trim() !== '') {
+            query += `
+                AND (a.nomeSolicitante LIKE ? 
+                OR e.nomeEquipamento LIKE ?)
+            `;
+            const like = `%${search}%`;
+            values.push(like, like);
+        }
+
+        query += ` ORDER BY a.dataHorarioDev ASC`;
+
+        const pendentes = await executePromisified(query, values);
         res.json({ success: true, pendentes });
     } catch (erro) {
         console.error('Erro ao listar pendentes:', erro);
@@ -255,6 +244,8 @@ app.get('/relatorios', async (req, res) => {
                 a.idAgendamento,
                 e.nomeEquipamento,
                 e.fornecedor,
+                e.tipo_mime,
+                e.idEquipamentos AS idEquipamento,
                 a.nomeSolicitante,
                 a.dataHorarioAg,
                 a.dataHorarioDev,
@@ -271,7 +262,14 @@ app.get('/relatorios', async (req, res) => {
         `;
 
         const results = await executePromisified(query, [search, search, search]);
-        res.json({ success: true, relatorios: results });
+
+        // Adiciona o caminho da imagem para o frontend
+        const relatorios = results.map(item => ({
+            ...item,
+            imagemUrl: `/equipamento/imagem/${item.idEquipamento}`
+        }));
+
+        res.json({ success: true, relatorios });
     } catch (erro) {
         console.error('Erro ao gerar relatório:', erro);
         res.status(500).json({ success: false, message: 'Erro interno ao gerar relatório.' });
@@ -424,6 +422,44 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'index.html'));
 });
 
+app.delete('/equipamento/:id', async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id) || id <= 0) {
+      return res.status(400).json({ success: false, message: 'ID inválido.' });
+    }
+  
+    try {
+      // Verifica existência
+      const checkQuery = 'SELECT idEquipamentos FROM equipamentos WHERE idEquipamentos = ?';
+      const check = await executePromisified(checkQuery, [id]);
+      if (!check || check.length === 0) {
+        return res.status(404).json({ success: false, message: 'Equipamento não encontrado.' });
+      }
+  
+      // Opcional: remover agendamentos/devoluções relacionados para evitar FK errors
+      // Ajuste os nomes das tabelas/colunas conforme seu schema.
+      try {
+        await executePromisified('DELETE FROM devolucao WHERE idEquipamento = ?', [id]);
+        await executePromisified('DELETE FROM agendamento WHERE idEquipamento = ?', [id]);
+      } catch (innerErr) {
+        // Se não quiser apagar agendamentos por regra de negócio, comente acima.
+        console.warn('Aviso: não foi possível remover relacionamentos (ok se inexistente):', innerErr.message);
+      }
+  
+      // Remove o equipamento
+      const deleteQuery = 'DELETE FROM equipamentos WHERE idEquipamentos = ?';
+      await executePromisified(deleteQuery, [id]);
+  
+      return res.json({ success: true, message: 'Equipamento excluído com sucesso.' });
+    } catch (err) {
+      console.error('Erro ao excluir equipamento:', err);
+      // Se for erro de constraint específico, devolvemos 409 com mensagem detalhada
+      if (err && err.code && (err.code === 'ER_ROW_IS_REFERENCED_' || err.code === 'ER_ROW_IS_REFERENCED')) {
+        return res.status(409).json({ success: false, message: 'Não foi possível excluir: existem registros referenciando este equipamento.' });
+      }
+      return res.status(500).json({ success: false, message: 'Erro interno ao excluir equipamento.' });
+    }
+  });
 // ======================================================================
 // INICIALIZAÇÃO DO SERVIDOR
 // ======================================================================
