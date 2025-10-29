@@ -909,3 +909,13 @@ body {
 .product-card.relatorio-card .product-meta:nth-last-child(2) {
     border-top: none; /* Remove a borda do solicitante */
 }
+
+#product-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaço entre os botões */
+}
+
+#product-sidebar .create-product-card {
+    width: 100%;
+}

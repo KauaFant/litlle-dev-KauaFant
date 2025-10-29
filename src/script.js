@@ -271,6 +271,16 @@ async function loadProducts() {
         productList.style.display = 'none';
     }
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const refreshBtn = document.getElementById('refresh-products');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async () => {
+            refreshBtn.querySelector('.create-text').textContent = 'Atualizando...';
+            await loadProducts();
+            refreshBtn.querySelector('.create-text').textContent = 'Atualizar Equipamentos';
+        });
+    }
+});
 
 function addSelectionLogic() {
     const productCards = document.querySelectorAll('.product-item-card');
