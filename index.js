@@ -26,42 +26,6 @@ function executePromisified(sql, values) {
     });
 }
 
-app.post('/equipamento/cadastro', upload.single('imagemEquipamento'), async (req, res) => {
-    const file = req.file;
-    const { fornecedor, nomeEquipamento, descricao, altoValor } = req.body;
-
-    if (!file) {
-        return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada para o equipamento.' });
-    }
-
-    if (!fornecedor || !nomeEquipamento || !descricao || altoValor === undefined) {
-        return res.status(400).json({ success: false, message: 'Todos os campos de texto do equipamento são obrigatórios.' });
-    }
-
-    try {
-        const tipo_mime = file.mimetype;
-        const dadosBinarios = file.buffer;
-        const altoValorDb = (altoValor === 'true' || altoValor === 1 || altoValor === '1');
-
-        const query = `
-            INSERT INTO equipamentos 
-            (fornecedor, nomeEquipamento, descricao, altoValor, tipo_mime, imagemEquipamento)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `;
-        const values = [fornecedor, nomeEquipamento, descricao, altoValorDb, tipo_mime, dadosBinarios];
-        const resultado = await executePromisified(query, values);
-
-        res.json({
-            success: true,
-            message: 'Equipamento cadastrado com sucesso!',
-            idEquipamento: resultado.insertId
-        });
-    } catch (erro) {
-        console.error('Erro ao cadastrar o equipamento:', erro);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor ao cadastrar o equipamento.' });
-    }
-});
-
 // ======================================================================
 // ROTA: LISTAR EQUIPAMENTOS
 // ======================================================================
@@ -420,6 +384,42 @@ app.get('/relatorios/pdf', async (req, res) => {
 // ======================================================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'index.html'));
+});
+
+app.post('/equipamento/cadastro', upload.single('imagemEquipamento'), async (req, res) => {
+    const file = req.file;
+    const { fornecedor, nomeEquipamento, descricao, altoValor } = req.body;
+
+    if (!file) {
+        return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada para o equipamento.' });
+    }
+
+    if (!fornecedor || !nomeEquipamento || !descricao || altoValor === undefined) {
+        return res.status(400).json({ success: false, message: 'Todos os campos de texto do equipamento são obrigatórios.' });
+    }
+
+    try {
+        const tipo_mime = file.mimetype;
+        const dadosBinarios = file.buffer;
+        const altoValorDb = (altoValor === 'true' || altoValor === 1 || altoValor === '1');
+
+        const query = `
+            INSERT INTO equipamentos 
+            (fornecedor, nomeEquipamento, descricao, altoValor, tipo_mime, imagemEquipamento)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        const values = [fornecedor, nomeEquipamento, descricao, altoValorDb, tipo_mime, dadosBinarios];
+        const resultado = await executePromisified(query, values);
+
+        res.json({
+            success: true,
+            message: 'Equipamento cadastrado com sucesso!',
+            idEquipamento: resultado.insertId
+        });
+    } catch (erro) {
+        console.error('Erro ao cadastrar o equipamento:', erro);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor ao cadastrar o equipamento.' });
+    }
 });
 
 app.delete('/equipamento/:id', async (req, res) => {
