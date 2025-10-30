@@ -460,9 +460,35 @@ app.delete('/equipamento/:id', async (req, res) => {
       return res.status(500).json({ success: false, message: 'Erro interno ao excluir equipamento.' });
     }
   });
-// ======================================================================
-// INICIALIZAÇÃO DO SERVIDOR
-// ======================================================================
+
+  app.put('/equipamento/editar/:id', upload.single('novaImagemEquipamento'), async (req, res) => {
+    const id = req.params.id;
+    const { novoNomeEquipamento, novaDescricao, novoAltoValor } = req.body;
+    const file = req.file;
+
+    try {
+        let query = `
+            UPDATE equipamentos
+            SET nomeEquipamento = ?, descricao = ?, altoValor = ?
+        `;
+        const values = [novoNomeEquipamento, novaDescricao, novoAltoValor === 'on' ? 1 : 0];
+
+        if (file) {
+            query += `, tipo_mime = ?, imagemEquipamento = ?`;
+            values.push(file.mimetype, file.buffer);
+        }
+
+        query += ` WHERE idEquipamentos = ?`;
+        values.push(id);
+
+        await executePromisified(query, values);
+        res.json({ success: true, message: 'Equipamento atualizado com sucesso!' });
+    } catch (err) {
+        console.error('Erro ao editar equipamento:', err);
+        res.status(500).json({ success: false, message: 'Erro ao editar o equipamento.' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em: http://localhost:${PORT}`);
 });

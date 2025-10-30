@@ -820,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initPendentesSearch();  // "Pendentes"
 });
 
-const excluirModal = document.getElementById('excluir-modal');
+const Modexcluiral = document.getElementById('excluir-modal');
 const openExcluirBtn = document.getElementById('open-excluir-modal');
 const closeExcluirBtn = document.getElementById('close-excluir-modal');
 const excluirForm = document.getElementById('excluir-form');
@@ -892,5 +892,55 @@ excluirForm?.addEventListener('submit', async (e) => {
     } catch (error) {
         console.error('Erro ao comunicar com o servidor durante exclusão:', error);
         alert('Erro de comunicação com o servidor. Veja o console para detalhes.');
+    }
+});
+
+document.getElementById('open-editar-modal')?.addEventListener('click', async () => {
+    const modal = document.getElementById('editar-modal');
+    modal.classList.add('visible');
+
+    // Preenche o select com os equipamentos
+    const select = document.getElementById('equipamentoEditar');
+    select.innerHTML = '';
+    try {
+        const res = await fetch('/equipamentos');
+        const data = await res.json();
+        if (data.success) {
+            data.equipamentos.forEach(eq => {
+                const option = document.createElement('option');
+                option.value = eq.idEquipamentos;
+                option.textContent = eq.nomeEquipamento;
+                select.appendChild(option);
+            });
+        }
+    } catch (e) {
+        alert('Erro ao carregar equipamentos.');
+    }
+});
+
+document.getElementById('close-editar-modal')?.addEventListener('click', () => {
+    document.getElementById('editar-modal').classList.remove('visible');
+});
+
+document.getElementById('editar-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const id = formData.get('equipamentoEditar');
+
+    try {
+        const res = await fetch(`/equipamento/editar/${id}`, {
+            method: 'PUT',
+            body: formData
+        });
+        const result = await res.json();
+        if (result.success) {
+            alert('Equipamento atualizado com sucesso!');
+            document.getElementById('editar-modal').classList.remove('visible');
+            loadProducts();
+        } else {
+            alert('Erro ao atualizar: ' + result.message);
+        }
+    } catch (err) {
+        alert('Erro na comunicação com o servidor.');
     }
 });

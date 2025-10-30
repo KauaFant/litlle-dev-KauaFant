@@ -72,10 +72,10 @@
                         <span class="create-tip">Cadastre um novo equipamento para agendar.</span>
                     </button>
                 
-                    <button id="refresh-products" class="create-product-card" style="border-color:#226FC0;">
-                        <i class="fas fa-sync-alt" style="color:#226FC0;"></i>
-                        <span class="create-text" style="color:#16429F;">Atualizar Equipamentos</span>
-                        <span class="create-tip">Recarrega a lista de equipamentos cadastrados.</span>
+                    <button id="open-editar-modal" class="create-product-card" style="border-color:#226FC0;">
+                        <i class="fas fa-edit" style="color:#226FC0;"></i>
+                        <span class="create-text" style="color:#16429F;">Editar Equipamento</span>
+                        <span class="create-tip">Atualize as informações de um equipamento existente.</span>
                     </button>
                 
                     <button id="open-excluir-modal" class="create-product-card" style="border-color:#C62828;">
@@ -114,6 +114,43 @@
                 </div>
             </div>
         </section>
+
+        <div id="editar-modal" class="modal-overlay">
+            <div class="modal-content cadastro-content">
+                <h3>Editar Equipamento</h3>
+                <form id="editar-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="equipamentoEditar">Selecione o equipamento:</label>
+                        <select id="equipamentoEditar" required></select>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="novoNomeEquipamento">Novo Nome:</label>
+                        <input type="text" id="novoNomeEquipamento" name="novoNomeEquipamento" required>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="novaDescricao">Nova Descrição:</label>
+                        <textarea id="novaDescricao" name="novaDescricao" rows="3" required></textarea>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="novaImagemEquipamento">Nova Imagem (opcional):</label>
+                        <input type="file" id="novaImagemEquipamento" name="novaImagemEquipamento" accept="image/*">
+                    </div>
+        
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="novoAltoValor" name="novoAltoValor">
+                        <label for="novoAltoValor">Equipamento de Alto Valor</label>
+                    </div>
+        
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-btn" id="close-editar-modal">Cancelar</button>
+                        <button type="submit" class="confirm-modal-btn">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <section id="relatorios-section" class="hidden">
             <h2><i class="fas fa-chart-line"></i> Relatórios de Agendamentos</h2>
