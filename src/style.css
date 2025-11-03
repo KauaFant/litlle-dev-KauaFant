@@ -265,8 +265,8 @@ body {
     border: 2px dashed var(--medium-blue);
     border-radius: 8px;
     padding: 30px;
-    width: 100%;
-    height: 180px;
+    width: 80%;
+    height: 100px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -294,7 +294,7 @@ body {
 }
 
 .create-tip {
-    font-size: 0.8em;
+    font-size: 1em;
     font-weight: 300;
     color: #666;
     margin-top: 5px;
