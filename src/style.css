@@ -5,34 +5,28 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Utilitários */
 .hidden {
     display: none !important;
 }
 .visible {
-    /* Força a visibilidade, mas a regra .modal-overlay.visible é mais específica */
     display: flex !important; 
 }
 
 html, body {
     height: 100%;
-    /* Garante que a altura da página seja igual à altura da viewport */
 }
 :root {
-    /* Azul institucional (principal SENAI/FIEP) */
-    --main-blue: #16429F;    /* R:25 G:66 B:159 — cor principal */
-    --dark-blue: #112E73;    /* R:17 G:46 B:115 — azul mais escuro */
-    --medium-blue: #226FC0;  /* R:34 G:111 B:192 — azul médio */
-    --light-blue: #2CA0E9;   /* R:44 G:160 B:233 — azul claro */
+    --main-blue: #16429F;
+    --dark-blue: #112E73;
+    --medium-blue: #226FC0;
+    --light-blue: #2CA0E9;
 
-    /* Cores de apoio */
     --white: #ffffff;
     --gray-bg: #F3F5F8;
     --gray-card: #E8ECF3;
     --text-dark: #1B1B1B;
     --border-gray: #C4C4C4;
 
-    /* Sombra e destaque */
     --shadow-light: rgba(0, 0, 0, 0.05);
     --shadow-hover: rgba(0, 0, 0, 0.15);
 }
@@ -184,7 +178,6 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    /* ALTERAÇÃO: Mudar de 280px para auto */
     height: auto; 
     box-shadow: 0 1px 4px var(--shadow-light);
     transition: box-shadow 0.2s ease;
@@ -280,7 +273,7 @@ body {
     align-items: center;
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
-    margin-bottom: 20px; /* Mantido visível */
+    margin-bottom: 20px;
 }
 
 .create-product-card:hover {
@@ -307,9 +300,6 @@ body {
     margin-top: 5px;
 }
 
-/* ========================================================== */
-/* REGRAS GERAIS DE MODAL (UNIFICADAS E CORRIGIDAS) */
-/* ========================================================== */
 .modal-overlay {
     display: none; 
     position: fixed;
@@ -325,7 +315,7 @@ body {
 }
 
 .modal-overlay.visible {
-    display: flex !important; /* Força a exibição e centralização */
+    display: flex !important;
 }
 
 .modal-content {
@@ -334,7 +324,6 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 12px var(--shadow-hover);
     width: 90%;
-    /* Garante que o conteúdo não saia do centro */
     position: relative; 
     top: auto;
     left: auto;
@@ -443,21 +432,17 @@ body {
     box-shadow: 0 1px 4px var(--shadow-light);
 }
 
-/* ========================================================== */
-/* CALENDÁRIO E LAYOUT DE AGENDAMENTO */
-/* ========================================================== */
 .schedule-layout {
     display: flex;
     gap: 30px;
 }
 
 .product-selection-sidebar {
-    width: 380px; 
-    flex-shrink: 0;
-    background-color: var(--white);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 6px var(--shadow-light);
+    height: 100%;
+    max-height: 800px; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .product-selection-sidebar:not(.empty-state) {
@@ -470,9 +455,28 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-height: 560px; 
+    height: 600px;
     overflow-y: auto;
-    padding-right: 5px; 
+    padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--medium-blue) #f5f5f5;
+}
+
+.product-list::-webkit-scrollbar {
+    width: 10px;
+}
+.product-list::-webkit-scrollbar-thumb {
+    background-color: var(--medium-blue);
+    border-radius: 5px;
+}
+.product-list::-webkit-scrollbar-track {
+    background-color: #f5f5f5;
+}
+
+.product-selection-sidebar {
+    height: 780px;
+    overflow: hidden;
+    position: relative;
 }
 
 .calendar-area {
@@ -609,10 +613,6 @@ body {
     background-color: var(--dark-blue); 
 }
 
-/* ========================================================== */
-/* CARDS DE EQUIPAMENTO NA SIDEBAR */
-/* ========================================================== */
-
 .product-item-card {
     background-color: var(--gray-card);
     border-radius: 6px;
@@ -723,8 +723,7 @@ body {
 }
 
 #used-section {
-    padding-top: 20px; /* Adiciona um espaço superior, se necessário */
-    /* Garante que o grid-template-columns do .products-grid seja aplicado */
+    padding-top: 20px;
 }
 
 #used-section {
@@ -754,30 +753,26 @@ body {
 }
 
 .product-card.used-card .product-meta {
-    /* Ajusta o padding para que as datas se encaixem melhor */
     padding-top: 5px; 
     margin-top: 5px;
-    /* Altera para display flex para melhor controle de alinhamento vertical das datas */
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Alinha o texto das datas à esquerda */
-    border-top: none; /* Remove a linha divisória extra */
+    align-items: flex-start;
+    border-top: none;
 }
 
 .product-card.used-card .product-meta:nth-of-type(2) {
-    border-top: 1px solid var(--border-gray); /* Mantém a linha divisória acima do nome do usuário */
+    border-top: 1px solid var(--border-gray);
     margin-bottom: 0px;
 }
 
 .product-card.used-card .product-meta .days-indicator {
-    /* Garante que o indicador ocupe a largura completa ou se ajuste */
     width: 100%; 
     text-align: left;
-    margin-top: 8px; /* Espaçamento entre as datas */
-    box-sizing: border-box; /* Inclui padding e border na largura total */
+    margin-top: 8px;
+    box-sizing: border-box;
 }
 
-/* Ajuste para telas menores */
 @media (max-width: 650px) {
     .modal-content.cadastro-content {
         width: 90%;
@@ -788,27 +783,22 @@ body {
 #pendentes-section .product-card.used-card {
     border: 1px solid #C62828;
 }
+
 #pendentes-section .product-name {
     color: #C62828;
 }
-/* ========================================================== */
-/* RELATÓRIOS */
-/* ========================================================== */
-
-/* Estilo geral para a seção de relatórios */
 
 #relatorios-section {
-    animation: fadeIn 0.3s ease-in; /* Reutiliza a animação de fade-in */
-    padding-bottom: 50px; /* Espaço inferior */
+    animation: fadeIn 0.3s ease-in;
+    padding-bottom: 50px;
 }
 
-/* Estiliza o botão de download de PDF */
 #btn-download-pdf {
     display: block;
     width: 280px;
     margin: 30px auto 0;
     padding: 15px 20px;
-    background-color: var(--dark-blue); /* Azul escuro principal */
+    background-color: var(--dark-blue);
     color: var(--white);
     border: none;
     border-radius: 8px;
@@ -820,7 +810,7 @@ body {
 }
 
 #btn-download-pdf:hover {
-    background-color: var(--main-blue); /* Azul principal no hover */
+    background-color: var(--main-blue);
     box-shadow: 0 6px 15px var(--shadow-hover);
     transform: translateY(-2px);
 }
@@ -830,17 +820,15 @@ body {
     font-size: 1.2em;
 }
 
-/* Estilo simplificado para o card de relatório */
 .product-card.relatorio-card {
-    /* Base do card de produto */
-    background-color: var(--white); /* Fundo branco para destaque */
+    background-color: var(--white);
     border: 1px solid var(--border-gray);
     box-shadow: 0 2px 5px var(--shadow-light);
     padding: 20px;
-    height: 320px; /* Altura fixa para uniformidade */
+    height: 320px;
     display: flex;
     flex-direction: column;
-    justify-content: space-around; /* Distribui o conteúdo verticalmente */
+    justify-content: space-around;
     text-align: center;
 }
 
@@ -850,35 +838,30 @@ body {
 }
 
 .product-card.relatorio-card .product-name {
-    /* Nome do Equipamento */
     font-size: 1.1em;
     color: var(--main-blue);
     margin-bottom: 5px;
 }
 
 .product-card.relatorio-card .product-image-container {
-    /* Container da Imagem */
-    height: 120px; /* Altura dedicada para a imagem */
+    height: 120px;
     margin-bottom: 15px;
 }
 
 .product-card.relatorio-card .product-image {
-    /* Imagem */
     width: 90%;
     max-height: 100%;
     border: 1px solid var(--gray-card);
 }
 
 .product-card.relatorio-card .product-meta {
-    /* Meta-informações (como o nome do solicitante) */
-    border-top: none; /* Remove a borda divisória */
+    border-top: none;
     padding-top: 0;
     margin-top: 5px;
-    display: block; /* Garante que o span ocupe a linha toda */
+    display: block;
 }
 
 .product-card.relatorio-card .user-name {
-    /* Nome do Solicitante */
     font-size: 0.9em;
     color: var(--text-dark);
     font-weight: 300;
@@ -894,26 +877,25 @@ body {
     color: var(--dark-blue);
 }
 
-/* Esconde as outras informações meta que não foram solicitadas no novo layout */
 .product-card.relatorio-card .days-indicator {
     display: none !important;
 }
 
-/* Estilo específico para o solicitante e o fornecedor */
-.product-card.relatorio-card .product-meta:nth-last-child(2), /* Solicitante */
-.product-card.relatorio-card .product-meta:last-child { /* Fornecedor (escondido no novo layout) */
+.product-card.relatorio-card .product-meta:nth-last-child(2),
+.product-card.relatorio-card .product-meta:last-child {
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px solid var(--border-gray);
 }
+
 .product-card.relatorio-card .product-meta:nth-last-child(2) {
-    border-top: none; /* Remove a borda do solicitante */
+    border-top: none;
 }
 
 #product-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Espaço entre os botões */
+    gap: 15px;
 }
 
 #product-sidebar .create-product-card {

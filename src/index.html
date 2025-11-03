@@ -10,7 +10,6 @@
 </head>
 <body class="left-scrollbar-simulacao">
 
-    <!-- ================= CABEÇALHO ================= -->
     <header class="navbar">
         <div class="logo-container">
             <img src="./img/logo-senai.png" alt="Logo SENAI" class="logo-senai"> 
@@ -29,9 +28,7 @@
         </div>
     </header>
 
-    <!-- ================= CONTEÚDO PRINCIPAL ================= -->
     <main class="content-container">
-        <!-- ======== ABA USADOS ======== -->
         <section id="used-section" class="hidden">
             <h2><i class="fas fa-history"></i> Equipamentos Usados</h2>
     
@@ -43,7 +40,6 @@
             </div>
     
             <div id="used-list-grid" class="products-grid">
-                <!-- O JavaScript vai preencher com os cards dos agendamentos -->
             </div>
         </section>
 
@@ -58,11 +54,9 @@
     </div>
 
     <div id="pendentes-list-grid" class="products-grid">
-        <!-- Cards preenchidos via JavaScript -->
     </div>
 </section>
-    
-        <!-- ======== ABA AGENDAR ======== -->
+
         <section id="agendamentos-section">
             <div class="schedule-layout">
                 <aside id="product-sidebar" class="product-selection-sidebar">
@@ -121,7 +115,7 @@
                 <form id="editar-form" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="equipamentoEditar">Selecione o equipamento:</label>
-                        <select id="equipamentoEditar" required></select>
+                        <select id="equipamentoEditar" name="equipamentoEditar" required></select>
                     </div>
         
                     <div class="form-group">
@@ -162,7 +156,6 @@
             </div>
         
             <div id="relatorios-list-grid" class="products-grid">
-                <!-- O JavaScript vai preencher com os dados -->
             </div>
             <button id="btn-download-pdf"><i class="fas fa-file-pdf"></i> Baixar Relatório PDF</button>
             <div id="relatorio-modal" class="modal-overlay">
@@ -210,7 +203,6 @@
         </section>
     </main>
 
-    <!-- ================= MODAL DE CADASTRO ================= -->
     <div id="cadastro-modal" class="modal-overlay">
         <div class="modal-content cadastro-content">
             <h3>Cadastro de Equipamento</h3>

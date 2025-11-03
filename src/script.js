@@ -3,9 +3,6 @@ let selectedEquipamentoNome = null;
 let selectedDate = null;
 const confirmButton = document.querySelector('.confirm-btn') || document.getElementById('open-agendamento-btn');
 
-// --- Reuso de funções dos seus arquivos originais (modificadas para integração) ---
-
-// Funções de modal de cadastro (mantive sua lógica)
 document.getElementById('open-cadastro-modal')?.addEventListener('click', () => {
     document.getElementById('cadastro-modal').classList.add('visible');
 });
@@ -14,7 +11,6 @@ document.getElementById('close-cadastro-modal')?.addEventListener('click', () =>
     document.getElementById('cadastro-form')?.reset();
 });
 
-// Lógica para envio do formulário de cadastro de equipamento (mantida)
 document.getElementById('cadastro-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -22,13 +18,11 @@ document.getElementById('cadastro-form')?.addEventListener('submit', async (e) =
     const fileInput = form.elements['imagemEquipamento'];
     const file = fileInput.files[0];
 
-    // --- 🔒 Validação: aceitar apenas imagens ---
     if (!file || !file.type.startsWith('image/')) {
         alert('Por favor, selecione um arquivo de imagem válido (JPEG, PNG, etc).');
         return;
     }
 
-    // --- 🔒 Validação: campos de texto não podem ser só espaços ---
     const fornecedor = form.elements['fornecedor'].value.trim();
     const nomeEquipamento = form.elements['nomeEquipamento'].value.trim();
     const descricao = form.elements['descricao'].value.trim();
@@ -43,7 +37,6 @@ document.getElementById('cadastro-form')?.addEventListener('submit', async (e) =
     formData.set('descricao', descricao);
     formData.set('altoValor', form.elements['altoValor'].checked ? 1 : 0);
 
-    // prossegue com o envio original
     try {
         const response = await fetch('/equipamento/cadastro', {
             method: 'POST',
@@ -63,21 +56,17 @@ document.getElementById('cadastro-form')?.addEventListener('submit', async (e) =
     }
 });
 
-// Atualiza o estado do botão Confirmar/Agendar
 function updateConfirmButtonState() {
     if (!confirmButton) return;
     confirmButton.disabled = !(selectedEquipamentoId && selectedDate);
 }
-
-// --- RENDERIZAÇÃO DINÂMICA DO CALENDÁRIO ---
 
 const monthNames = [
     'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
     'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
 ];
 
-let current = new Date(); // mês/ano atual - você pode ajustar se quiser abrir em um mês fixo
-
+let current = new Date();
 const calendarGridEl = document.getElementById('calendar-grid');
 const monthTitleEl = document.getElementById('month-title');
 const prevBtn = document.getElementById('prev-month');
@@ -85,10 +74,7 @@ const nextBtn = document.getElementById('next-month');
 const dataDevolucaoInput = document.getElementById('dataDevolucao');
 
 function renderCalendar(dateObj) {
-    // Limpa grid
     calendarGridEl.innerHTML = '';
-
-    // Cabeçalhos dos dias
     const dayHeaders = ['Domingo','Segunda-Feira','Terça-Feira','Quarta-Feira','Quinta-Feira','Sexta-Feira','Sábado'];
     dayHeaders.forEach(h => {
         const el = document.createElement('div');
@@ -99,20 +85,14 @@ function renderCalendar(dateObj) {
 
     const year = dateObj.getFullYear();
     const month = dateObj.getMonth();
-
-    // Título do mês
     monthTitleEl.textContent = `${monthNames[month]} ${year}`;
 
-    // Primeiro dia do mês (weekday) e quantos dias tem o mês
     const firstOfMonth = new Date(year, month, 1);
-    const startWeekday = firstOfMonth.getDay(); // 0 (Dom) - 6 (Sáb)
+    const startWeekday = firstOfMonth.getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    // Quantos dias do mês anterior precisam aparecer (para completar a primeira linha)
-    const prevMonthDays = startWeekday; // 0..6
+    const prevMonthDays = startWeekday;
     const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-    // Adiciona os dias do mês anterior (classes .prev-month)
     for (let i = prevMonthDays - 1; i >= 0; i--) {
         const dayNumber = daysInPrevMonth - i;
         const dayEl = document.createElement('div');
@@ -121,19 +101,14 @@ function renderCalendar(dateObj) {
         calendarGridEl.appendChild(dayEl);
     }
 
-    // Dias do mês atual
     for (let d = 1; d <= daysInMonth; d++) {
         const dayEl = document.createElement('div');
         dayEl.className = 'calendar-day';
         dayEl.textContent = String(d);
-
-        // data completa em ISO para referência (YYYY-MM-DD)
         dayEl.dataset.fullDate = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-
         calendarGridEl.appendChild(dayEl);
     }
 
-    // Preenche os dias do próximo mês para completar a última semana (até 42 células no total: 7x6)
     const totalCellsSoFar = prevMonthDays + daysInMonth;
     const nextDaysToAdd = (7 - (totalCellsSoFar % 7)) % 7;
     for (let n = 1; n <= nextDaysToAdd; n++) {
@@ -143,7 +118,6 @@ function renderCalendar(dateObj) {
         calendarGridEl.appendChild(dayEl);
     }
 
-    // Após renderizar, anexa a lógica de seleção dos dias
     addCalendarSelectionLogic();
 }
 
@@ -156,39 +130,28 @@ function goToNextMonth() {
     renderCalendar(current);
 }
 
-// Event listeners nas setas
 prevBtn?.addEventListener('click', goToPrevMonth);
 nextBtn?.addEventListener('click', goToNextMonth);
 
-// --- SELEÇÃO DE DIAS (mantive e adaptei sua lógica) ---
 function addCalendarSelectionLogic() {
-    // Seleciona apenas dias do mês atual (não prev/next)
     const calendarDays = document.querySelectorAll('.calendar-day:not(.prev-month):not(.next-month)');
 
     calendarDays.forEach(day => {
-        const dateValue = day.textContent;
-
-        // Remove listeners duplicados (evita múltiplos binds após re-render)
         day.replaceWith(day.cloneNode(true));
     });
-    // Requery depois do clone
+
     const freshDays = document.querySelectorAll('.calendar-day:not(.prev-month):not(.next-month)');
 
     freshDays.forEach(day => {
         day.addEventListener('click', () => {
             const fullDate = day.dataset.fullDate;
-            const today = new Date().toISOString().split('T')[0]; // formato YYYY-MM-DD
-    
-            // --- 🔒 Bloqueia dias anteriores ao atual ---
+            const today = new Date().toISOString().split('T')[0];
+
             if (fullDate < today) {
                 alert('Não é possível agendar em uma data anterior ao dia atual.');
                 return;
             }
-    
-            if (!selectedEquipamentoId) {
-                alert('Por favor, selecione um equipamento primeiro!');
-                return;
-            }
+
             if (!selectedEquipamentoId) {
                 alert('Por favor, selecione um equipamento primeiro!');
                 return;
@@ -198,13 +161,9 @@ function addCalendarSelectionLogic() {
                 day.classList.remove('selected-day');
                 selectedDate = null;
             } else {
-                // Remove seleção anterior
                 document.querySelectorAll('.calendar-day.selected-day').forEach(d => d.classList.remove('selected-day'));
                 day.classList.add('selected-day');
-
-                // Usa dataset.fullDate se disponível, senão monta a partir do texto
                 selectedDate = day.dataset.fullDate || (() => {
-                    // monta YYYY-MM-DD usando current
                     const dayNum = String(day.textContent).padStart(2,'0');
                     return `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,'0')}-${dayNum}`;
                 })();
@@ -214,13 +173,8 @@ function addCalendarSelectionLogic() {
         });
     });
 
-    // Atualiza estado do botão inicialmente
     updateConfirmButtonState();
 }
-
-// -------------------------
-// Carregamento de produtos e seleção (mantive suas funções e integração)
-// -------------------------
 
 async function loadProducts() {
     const sidebar = document.getElementById('product-sidebar');
@@ -230,7 +184,6 @@ async function loadProducts() {
 
     selectedEquipamentoId = null;
     selectedDate = null;
-    // limpa seleção visual
     document.querySelectorAll('.calendar-day.selected-day').forEach(d => d.classList.remove('selected-day'));
     updateConfirmButtonState();
 
@@ -246,7 +199,7 @@ async function loadProducts() {
                 const productHtml = `
                     <div class="product-item-card" data-id="${equipamento.idEquipamentos}">
                         <div class="product-item-image-container">
-                            <img class="product-item-image" src="/equipamento/imagem/${equipamento.idEquipamentos}" alt="${equipamento.nomeEquipamento}">
+                        <img class="product-item-image" src="/equipamento/imagem/${equipamento.idEquipamentos}?t=${Date.now()}" alt="${equipamento.nomeEquipamento}">
                         </div>
                         <div class="product-item-details">
                             <span class="product-item-name">${equipamento.nomeEquipamento}</span>
@@ -271,6 +224,7 @@ async function loadProducts() {
         productList.style.display = 'none';
     }
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     const refreshBtn = document.getElementById('refresh-products');
     if (refreshBtn) {
@@ -294,8 +248,8 @@ function addSelectionLogic() {
 
             if (card.classList.contains('selected')) {
                 card.classList.remove('selected');
-                selectedEquipamentoId = null;
                 selectButton.textContent = 'Selecionar';
+                selectedEquipamentoId = null;
             } else {
                 productCards.forEach(c => {
                     c.classList.remove('selected');
@@ -304,10 +258,10 @@ function addSelectionLogic() {
 
                 card.classList.add('selected');
                 selectedEquipamentoId = cardId;
+                selectedEquipamentoNome = card.querySelector('.product-item-name')?.textContent || '';
                 selectButton.textContent = 'Selecionado';
             }
 
-            // limpa dia selecionado
             selectedDate = null;
             document.querySelectorAll('.calendar-day.selected-day').forEach(d => d.classList.remove('selected-day'));
             updateConfirmButtonState();
@@ -315,9 +269,6 @@ function addSelectionLogic() {
     });
 }
 
-// -------------------------
-// Modal de agendamento (mantive sua lógica)
-// -------------------------
 const agendamentoModal = document.getElementById('agendamento-modal');
 const closeAgendamentoModalBtn = document.getElementById('close-agendamento-modal');
 const agendamentoForm = document.getElementById('agendamento-form');
@@ -328,31 +279,22 @@ function openAgendamentoModal() {
         return;
     }
 
-    const retiradaDate = selectedDate; // Formato YYYY-MM-DD
+    const retiradaDate = selectedDate;
 
-    // 1. DEFINE A RESTRIÇÃO: A data mínima de devolução é a data de retirada.
     if (dataDevolucaoInput) {
         dataDevolucaoInput.setAttribute('min', retiradaDate);
-        
-        // Opcional: Se o valor atual for menor que a data de retirada,
-        // força o valor para ser a data de retirada para evitar erro inicial.
         if (dataDevolucaoInput.value && dataDevolucaoInput.value < retiradaDate) {
-             dataDevolucaoInput.value = retiradaDate;
+            dataDevolucaoInput.value = retiradaDate;
         } else if (!dataDevolucaoInput.value) {
-            // Define a data de retirada como padrão para devolução (se não houver valor)
             dataDevolucaoInput.value = retiradaDate;
         }
     }
 
-    // 2. Atualiza os dados de exibição no modal (opcional, mas recomendado)
     const equipamentoSpan = agendamentoModal?.querySelector('#modal-equipamento-nome');
     const dataRetiradaSpan = agendamentoModal?.querySelector('#modal-data-retirada');
-    
-    // Supondo que você tem esses elementos no seu HTML
     if (equipamentoSpan) equipamentoSpan.textContent = selectedEquipamentoNome;
     if (dataRetiradaSpan) dataRetiradaSpan.textContent = new Date(retiradaDate).toLocaleDateString('pt-BR');
 
-    // 3. Exibe o modal
     agendamentoModal?.classList.add('visible');
 }
 
@@ -360,20 +302,15 @@ function closeAgendamentoModal() {
     agendamentoModal?.classList.remove('visible');
 }
 
-// Lógica para abrir o modal quando o botão "Agendar" é clicado
 confirmButton?.addEventListener('click', (e) => {
-    // A função 'updateConfirmButtonState' deve garantir que o botão só é habilitado
-    // se selectedEquipamentoId e selectedDate estiverem preenchidos
     if (!confirmButton.disabled) {
         e.preventDefault();
         openAgendamentoModal();
     }
 });
 
-// Lógica para fechar o modal
 closeAgendamentoModalBtn?.addEventListener('click', closeAgendamentoModal);
 
-// Submissão do formulário de agendamento (mantive a construção dos dados)
 agendamentoForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(agendamentoForm);
@@ -387,7 +324,6 @@ agendamentoForm?.addEventListener('submit', async (e) => {
         return;
     }
 
-    // selectedDate já está no formato YYYY-MM-DD (dataset)
     const dataHorarioAg_mysql = `${selectedDate} ${horarioAgendamento}:00`;
     const dataHorarioDev_mysql = `${dataDevolucao} ${horarioDevolucao}:00`;
 
@@ -426,9 +362,6 @@ agendamentoForm?.addEventListener('submit', async (e) => {
     }
 });
 
-// -------------------------
-// Navegação entre telas (mantive sua lógica)
-// -------------------------
 const navAgendar = document.getElementById('nav-schedule');
 const navUsados = document.getElementById('nav-used');
 const navPendentes = document.getElementById('nav-pendentes');
@@ -457,6 +390,7 @@ function navigateToSection(sectionToShowId) {
         navPendentes.classList.add('active');
         loadPendentes();
     }
+
     if (sectionToShowId === 'used-section') {
         initSearchBar();
     } else if (sectionToShowId === 'pendentes-section') {
@@ -464,27 +398,25 @@ function navigateToSection(sectionToShowId) {
     }
 }
 
-// Evento do botão Pendentes
 navPendentes.addEventListener('click', (e) => {
     e.preventDefault();
     navigateToSection('pendentes-section');
 });
-// Botões do menu
+
 navAgendar.addEventListener('click', (e) => {
     e.preventDefault();
     navigateToSection('agendamentos-section');
 });
+
 navUsados.addEventListener('click', (e) => {
     e.preventDefault();
     navigateToSection('used-section');
 });
 
-// Abre inicialmente na aba "Agendar"
 document.addEventListener('DOMContentLoaded', () => {
     navigateToSection('agendamentos-section');
 });
 
-// Carrega usados (mantive sua função)
 async function loadUsedItems(searchTerm = '') {
     const usedListGrid = document.getElementById('used-list-grid');
     if (!usedListGrid) return;
@@ -492,7 +424,6 @@ async function loadUsedItems(searchTerm = '') {
     usedListGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Carregando...</p>';
 
     try {
-        // Se tiver texto digitado, adiciona como parâmetro ?search=
         const url = searchTerm.trim() !== '' 
             ? `/agendamentos?search=${encodeURIComponent(searchTerm)}`
             : '/agendamentos';
@@ -537,34 +468,26 @@ async function loadUsedItems(searchTerm = '') {
     }
 }
 
-// ======================================================
-// 🧭 EVENTOS DA BARRA DE PESQUISA
-// ======================================================
 function initSearchBar() {
     const searchInput = document.getElementById('search-used');
     const searchButton = document.querySelector('#used-section .search-bar-top button');
     if (!searchInput || !searchButton) return;
 
-    // Evita adicionar o mesmo evento várias vezes — usa addEventListener mas remove antes
     searchButton.replaceWith(searchButton.cloneNode(true));
     const freshSearchButton = document.querySelector('#used-section .search-bar-top button');
 
     freshSearchButton.addEventListener('click', () => {
         const searchTerm = searchInput.value.trim();
-        // garante que a aba "Em Uso" esteja visível antes de carregar
         navigateToSection('used-section');
         loadUsedItems(searchTerm);
     });
 
-    // Use 'keydown' para capturar Enter de forma mais confiável
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.keyCode === 13) {
             e.preventDefault();
             const searchTerm = searchInput.value.trim();
-            // mostra a aba "Em Uso" e pesquisa apenas os resultados relacionados
             navigateToSection('used-section');
             loadUsedItems(searchTerm);
-            // Opcional: manter o foco no campo
             searchInput.focus();
         }
     });
@@ -588,11 +511,10 @@ function initPendentesSearch() {
     });
 }
 
-// Garante que o initSearchBar seja reativado ao abrir a aba "Em Uso"
 navUsados.addEventListener('click', (e) => {
     e.preventDefault();
     navigateToSection('used-section');
-    initSearchBar(); // reafirma os listeners
+    initSearchBar();
     initPendentesSearch();
 });
 
@@ -642,8 +564,8 @@ async function loadPendentes(searchTerm = '') {
     }
 }
 
-const navRelatorios = document.querySelector('.main-nav a[href="#"]').nextElementSibling; // ou mais seguro:
-const navRelatoriosItem = document.querySelectorAll('.main-nav .nav-item')[3]; // quarto item
+const navRelatorios = document.querySelector('.main-nav a[href="#"]').nextElementSibling;
+const navRelatoriosItem = document.querySelectorAll('.main-nav .nav-item')[3];
 const relatoriosSection = document.getElementById('relatorios-section');
 
 function navigateToSection(sectionToShowId) {
@@ -698,8 +620,6 @@ async function loadRelatorios(searchTerm = '') {
 
         if (data.success && data.relatorios.length > 0) {
             data.relatorios.forEach(item => {
-                // Removemos todas as informações de data e status, mantendo apenas:
-                // Imagem, Nome do Equipamento e Nome do Solicitante.
                 const card = `
                     <div class="product-card relatorio-card">
                         <div class="product-image-container">
@@ -739,7 +659,6 @@ function initRelatoriosSearch() {
     });
 }
 
-// Chama a inicialização ao carregar a página
 window.addEventListener('load', () => {
     loadProducts();
     renderCalendar(current);
@@ -756,17 +675,14 @@ const relatorioForm = document.getElementById('relatorio-form');
 const mensalFields = document.getElementById('mensal-fields');
 const anoField = document.getElementById('ano-field');
 
-// 1️⃣ Abrir modal ao clicar no botão (sem baixar nada)
 btnDownloadPDF.addEventListener('click', () => {
   relatorioModal.classList.add('visible');
 });
 
-// 2️⃣ Fechar modal
 cancelarRelatorioBtn.addEventListener('click', () => {
   relatorioModal.classList.remove('visible');
 });
 
-// 3️⃣ Mostrar/ocultar campos conforme seleção
 relatorioForm.addEventListener('change', () => {
   const tipo = relatorioForm.tipoRelatorio.value;
   if (tipo === 'mensal') {
@@ -778,49 +694,47 @@ relatorioForm.addEventListener('change', () => {
   }
 });
 
-// 4️⃣ Baixar PDF apenas após confirmação
 relatorioForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const tipo = relatorioForm.tipoRelatorio.value;
-  const mes = document.getElementById('mesSelecionado').value;
-  const ano = document.getElementById('anoSelecionado').value;
-
-  if (!tipo) {
-    alert('Selecione se deseja relatório mensal ou anual.');
-    return;
-  }
-
-  let url = '/relatorios/pdf';
-  if (tipo === 'mensal') {
-    url += `?tipo=mensal&mes=${mes}&ano=${ano}`;
-  } else {
-    url += `?tipo=anual&ano=${ano}`;
-  }
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Erro ao gerar PDF.');
-
-    const blob = await response.blob();
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = `relatorio-${tipo}-${ano}${tipo === 'mensal' ? '-' + mes : ''}.pdf`;
-    link.click();
-  } catch (err) {
-    alert('Falha ao gerar o PDF.');
-    console.error(err);
-  }
-
-  relatorioModal.classList.remove('visible');
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Inicializa as barras de pesquisa de cada aba
-    initSearchBar();        // "Em Uso"
-    initPendentesSearch();  // "Pendentes"
-});
-
-const Modexcluiral = document.getElementById('excluir-modal');
+    e.preventDefault();
+    const tipo = relatorioForm.tipoRelatorio.value;
+    const mes = document.getElementById('mesSelecionado').value;
+    const ano = document.getElementById('anoSelecionado').value;
+  
+    if (!tipo) {
+      alert('Selecione se deseja relatório mensal ou anual.');
+      return;
+    }
+  
+    let url = '/relatorios/pdf';
+    if (tipo === 'mensal') {
+      url += `?tipo=mensal&mes=${mes}&ano=${ano}`;
+    } else {
+      url += `?tipo=anual&ano=${ano}`;
+    }
+  
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Erro ao gerar PDF.');
+  
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `relatorio-${tipo}-${ano}${tipo === 'mensal' ? '-' + mes : ''}.pdf`;
+      link.click();
+    } catch (err) {
+      alert('Falha ao gerar o PDF.');
+      console.error(err);
+    }
+  
+    relatorioModal.classList.remove('visible');
+  });
+  
+  document.addEventListener('DOMContentLoaded', () => {
+      initSearchBar();
+      initPendentesSearch();
+  });
+  
+  const excluirModal = document.getElementById('excluir-modal');
 const openExcluirBtn = document.getElementById('open-excluir-modal');
 const closeExcluirBtn = document.getElementById('close-excluir-modal');
 const excluirForm = document.getElementById('excluir-form');
@@ -828,18 +742,14 @@ const selectExcluir = document.getElementById('equipamentoExcluir');
 
 openExcluirBtn?.addEventListener('click', async () => {
     excluirModal.classList.add('visible');
-    const response = await fetch('/equipamentos');
-    const data = await response.json();
-    console.log('equipamentos para exclusão:', data);
 
-    // Carrega os equipamentos disponíveis
     try {
         const response = await fetch('/equipamentos');
         const data = await response.json();
 
         selectExcluir.innerHTML = '';
 
-        if (data.success && data.equipamentos.length > 0) {
+        if (data.success && Array.isArray(data.equipamentos) && data.equipamentos.length > 0) {
             data.equipamentos.forEach(eq => {
                 const option = document.createElement('option');
                 option.value = eq.idEquipamentos;
@@ -853,8 +763,8 @@ openExcluirBtn?.addEventListener('click', async () => {
             selectExcluir.appendChild(opt);
         }
     } catch (error) {
-        console.error('Erro ao carregar equipamentos:', error);
-        alert('Erro ao carregar lista de equipamentos.');
+        console.error('Erro ao carregar equipamentos para exclusão:', error);
+        alert('Erro ao carregar lista de equipamentos. Veja o console para mais detalhes.');
     }
 });
 
@@ -875,16 +785,14 @@ excluirForm?.addEventListener('submit', async (e) => {
     try {
         const resp = await fetch(`/equipamento/${id}`, { method: 'DELETE' });
 
-        // Tenta parsear JSON (se houver)
-        let data;
-        try { data = await resp.json(); } catch (_) { data = null; }
+        let data = null;
+        try { data = await resp.json(); } catch (_) { /* resposta sem JSON */ }
 
         if (resp.ok) {
             alert((data && data.message) ? data.message : 'Equipamento excluído com sucesso!');
             excluirModal.classList.remove('visible');
             await loadProducts();
         } else {
-            // Mostra mensagem útil ao usuário
             const msg = (data && data.message) ? data.message : `Erro ao excluir (status ${resp.status})`;
             alert(msg);
             console.error('Resposta exclusão:', resp.status, data);
@@ -894,53 +802,54 @@ excluirForm?.addEventListener('submit', async (e) => {
         alert('Erro de comunicação com o servidor. Veja o console para detalhes.');
     }
 });
-
-document.getElementById('open-editar-modal')?.addEventListener('click', async () => {
-    const modal = document.getElementById('editar-modal');
-    modal.classList.add('visible');
-
-    // Preenche o select com os equipamentos
-    const select = document.getElementById('equipamentoEditar');
-    select.innerHTML = '';
-    try {
-        const res = await fetch('/equipamentos');
-        const data = await res.json();
-        if (data.success) {
-            data.equipamentos.forEach(eq => {
-                const option = document.createElement('option');
-                option.value = eq.idEquipamentos;
-                option.textContent = eq.nomeEquipamento;
-                select.appendChild(option);
-            });
-        }
-    } catch (e) {
-        alert('Erro ao carregar equipamentos.');
-    }
-});
-
-document.getElementById('close-editar-modal')?.addEventListener('click', () => {
-    document.getElementById('editar-modal').classList.remove('visible');
-});
-
-document.getElementById('editar-form')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const id = formData.get('equipamentoEditar');
-
-    try {
+  
+  document.getElementById('open-editar-modal')?.addEventListener('click', async () => {
+      const modal = document.getElementById('editar-modal');
+      modal.classList.add('visible');
+  
+      const select = document.getElementById('equipamentoEditar');
+      select.innerHTML = '';
+      try {
+          const res = await fetch('/equipamentos');
+          const data = await res.json();
+          if (data.success) {
+              data.equipamentos.forEach(eq => {
+                  const option = document.createElement('option');
+                  option.value = eq.idEquipamentos;
+                  option.textContent = eq.nomeEquipamento;
+                  select.appendChild(option);
+              });
+          }
+      } catch (e) {
+          alert('Erro ao carregar equipamentos.');
+      }
+  });
+  
+  document.getElementById('close-editar-modal')?.addEventListener('click', () => {
+      document.getElementById('editar-modal').classList.remove('visible');
+  });
+  
+  document.getElementById('editar-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const id = formData.get('equipamentoEditar');
+  
+      try {
         const res = await fetch(`/equipamento/editar/${id}`, {
             method: 'PUT',
-            body: formData
+            body: formData,
+            headers: { 'enctype': 'multipart/form-data' }
         });
-        const result = await res.json();
-        if (result.success) {
-            alert('Equipamento atualizado com sucesso!');
-            document.getElementById('editar-modal').classList.remove('visible');
-            loadProducts();
-        } else {
-            alert('Erro ao atualizar: ' + result.message);
-        }
-    } catch (err) {
-        alert('Erro na comunicação com o servidor.');
-    }
-});
+          const result = await res.json();
+          if (result.success) {
+              alert('Equipamento atualizado com sucesso!');
+              document.getElementById('editar-modal').classList.remove('visible');
+              loadProducts();
+          } else {
+              alert('Erro ao atualizar: ' + result.message);
+          }
+      } catch (err) {
+          alert('Erro na comunicação com o servidor.');
+      }
+  });
+  

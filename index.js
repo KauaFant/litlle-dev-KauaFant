@@ -1,22 +1,19 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const dbConnection = require('./models/db'); // conexão já configurada
+const dbConnection = require('./models/db');
 const app = express();
 const PORT = 8080;
 
-// Configuração do Express
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'src')));
 
-// Configuração do upload de imagens
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 100 * 1024 * 1024 } // 100MB
+    limits: { fileSize: 100 * 1024 * 1024 }
 });
 
-// Função auxiliar para usar Promises com MySQL
 function executePromisified(sql, values) {
     return new Promise((resolve, reject) => {
         dbConnection.query(sql, values, (error, results) => {
@@ -26,9 +23,6 @@ function executePromisified(sql, values) {
     });
 }
 
-// ======================================================================
-// ROTA: LISTAR EQUIPAMENTOS
-// ======================================================================
 app.get('/equipamentos', async (req, res) => {
     try {
         const query = `
@@ -45,7 +39,7 @@ app.get('/equipamentos', async (req, res) => {
 });
 
 app.get('/pendentes', async (req, res) => {
-    const search = req.query.search || ''; // termo digitado na barra
+    const search = req.query.search || '';
 
     try {
         let query = `
@@ -95,9 +89,7 @@ app.get('/agendamentos/pendentes', async (req, res) => {
             INNER JOIN equipamento e ON a.idEquipamento = e.idEquipamento
             WHERE a.dataHorarioDev < NOW()
         `;
-
         const results = await executePromisified(query);
-
         res.json({ success: true, pendentes: results });
     } catch (erro) {
         console.error('Erro ao buscar equipamentos pendentes:', erro);
@@ -105,9 +97,6 @@ app.get('/agendamentos/pendentes', async (req, res) => {
     }
 });
 
-// ======================================================================
-// ROTA: RETORNAR IMAGEM DE EQUIPAMENTO
-// ======================================================================
 app.get('/equipamento/imagem/:id', async (req, res) => {
     const idEquipamento = req.params.id;
 
@@ -134,11 +123,8 @@ app.get('/equipamento/imagem/:id', async (req, res) => {
     }
 });
 
-// ======================================================================
-// 🆕 ROTA: CADASTRAR NOVO AGENDAMENTO
-// ======================================================================
 app.get('/agendamentos', async (req, res) => {
-    const search = req.query.search || ''; // termo digitado na barra
+    const search = req.query.search || '';
 
     try {
         let query = `
@@ -178,12 +164,10 @@ app.post('/agendamento/novo', async (req, res) => {
     try {
         const { idEquipamento, nomeSolicitante, dataHorarioAg, dataHorarioDev } = req.body;
 
-        // Validação simples
         if (!idEquipamento || !nomeSolicitante || !dataHorarioAg || !dataHorarioDev) {
             return res.status(400).json({ success: false, message: 'Preencha todos os campos obrigatórios.' });
         }
 
-        // Query de inserção
         const query = `
             INSERT INTO agendamento (idEquipamento, nomeSolicitante, dataHorarioAg, dataHorarioDev)
             VALUES (?, ?, ?, ?)
@@ -227,7 +211,6 @@ app.get('/relatorios', async (req, res) => {
 
         const results = await executePromisified(query, [search, search, search]);
 
-        // Adiciona o caminho da imagem para o frontend
         const relatorios = results.map(item => ({
             ...item,
             imagemUrl: `/equipamento/imagem/${item.idEquipamento}`
@@ -247,7 +230,6 @@ app.get('/relatorios/pdf', async (req, res) => {
     try {
         const { tipo, mes, ano } = req.query;
 
-        // Monta o filtro SQL conforme o tipo de relatório
         let query = `
             SELECT 
                 a.idAgendamento,
@@ -266,31 +248,24 @@ app.get('/relatorios/pdf', async (req, res) => {
 
         const params = [];
 
-        // Filtro mensal
         if (tipo === 'mensal' && mes && ano) {
             query += ' WHERE MONTH(a.dataHorarioAg) = ? AND YEAR(a.dataHorarioAg) = ?';
             params.push(mes, ano);
-        }
-
-        // Filtro anual
-        else if (tipo === 'anual' && ano) {
+        } else if (tipo === 'anual' && ano) {
             query += ' WHERE YEAR(a.dataHorarioAg) = ?';
             params.push(ano);
         }
 
         query += ' ORDER BY a.dataHorarioAg DESC';
 
-        // Executa consulta filtrada
         const relatorios = await executePromisified(query, params);
 
-        // Geração do PDF
         const doc = new PDFDocument({ margin: 40, size: 'A4' });
         const fileName = `relatorio-${tipo || 'geral'}-${ano || 'todos'}${mes ? '-' + mes : ''}.pdf`;
         const filePath = path.join(__dirname, fileName);
         const writeStream = fs.createWriteStream(filePath);
         doc.pipe(writeStream);
 
-        // Título e cabeçalho
         doc
             .fontSize(18)
             .fillColor('#16429F')
@@ -308,7 +283,6 @@ app.get('/relatorios/pdf', async (req, res) => {
             )
             .moveDown(1.5);
 
-        // Cabeçalho da tabela
         const headerY = doc.y + 10;
         doc
             .fontSize(12)
@@ -326,7 +300,6 @@ app.get('/relatorios/pdf', async (req, res) => {
 
         doc.moveDown(2);
 
-        // Preenche as linhas
         relatorios.forEach((item, i) => {
             const status = item.dataDev
                 ? 'Devolvido'
@@ -347,7 +320,6 @@ app.get('/relatorios/pdf', async (req, res) => {
                 .text(new Date(item.dataHorarioAg).toLocaleDateString('pt-BR'), 285, y)
                 .text(new Date(item.dataHorarioDev).toLocaleDateString('pt-BR'), 385, y);
 
-            // Cor por status
             let color = '#000';
             if (status === 'Pendente') color = '#C62828';
             if (status === 'Em uso') color = '#1565C0';
@@ -358,7 +330,6 @@ app.get('/relatorios/pdf', async (req, res) => {
             doc.moveDown(1);
         });
 
-        // Mensagem se não houver registros
         if (relatorios.length === 0) {
             doc.moveDown(2);
             doc.fontSize(12).fillColor('#C62828').text('Nenhum registro encontrado para o período selecionado.', { align: 'center' });
@@ -366,7 +337,6 @@ app.get('/relatorios/pdf', async (req, res) => {
 
         doc.end();
 
-        // Finaliza e envia o PDF
         writeStream.on('finish', () => {
             res.download(filePath, fileName, (err) => {
                 if (err) console.error('Erro ao enviar PDF:', err);
@@ -378,10 +348,6 @@ app.get('/relatorios/pdf', async (req, res) => {
         res.status(500).json({ success: false, message: 'Erro ao gerar o relatório em PDF.' });
     }
 });
-
-// ======================================================================
-// ROTA PRINCIPAL (frontend)
-// ======================================================================
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'index.html'));
 });
@@ -425,53 +391,70 @@ app.post('/equipamento/cadastro', upload.single('imagemEquipamento'), async (req
 app.delete('/equipamento/:id', async (req, res) => {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id) || id <= 0) {
-      return res.status(400).json({ success: false, message: 'ID inválido.' });
+        return res.status(400).json({ success: false, message: 'ID inválido.' });
     }
-  
-    try {
-      // Verifica existência
-      const checkQuery = 'SELECT idEquipamentos FROM equipamentos WHERE idEquipamentos = ?';
-      const check = await executePromisified(checkQuery, [id]);
-      if (!check || check.length === 0) {
-        return res.status(404).json({ success: false, message: 'Equipamento não encontrado.' });
-      }
-  
-      // Opcional: remover agendamentos/devoluções relacionados para evitar FK errors
-      // Ajuste os nomes das tabelas/colunas conforme seu schema.
-      try {
-        await executePromisified('DELETE FROM devolucao WHERE idEquipamento = ?', [id]);
-        await executePromisified('DELETE FROM agendamento WHERE idEquipamento = ?', [id]);
-      } catch (innerErr) {
-        // Se não quiser apagar agendamentos por regra de negócio, comente acima.
-        console.warn('Aviso: não foi possível remover relacionamentos (ok se inexistente):', innerErr.message);
-      }
-  
-      // Remove o equipamento
-      const deleteQuery = 'DELETE FROM equipamentos WHERE idEquipamentos = ?';
-      await executePromisified(deleteQuery, [id]);
-  
-      return res.json({ success: true, message: 'Equipamento excluído com sucesso.' });
-    } catch (err) {
-      console.error('Erro ao excluir equipamento:', err);
-      // Se for erro de constraint específico, devolvemos 409 com mensagem detalhada
-      if (err && err.code && (err.code === 'ER_ROW_IS_REFERENCED_' || err.code === 'ER_ROW_IS_REFERENCED')) {
-        return res.status(409).json({ success: false, message: 'Não foi possível excluir: existem registros referenciando este equipamento.' });
-      }
-      return res.status(500).json({ success: false, message: 'Erro interno ao excluir equipamento.' });
-    }
-  });
 
-  app.put('/equipamento/editar/:id', upload.single('novaImagemEquipamento'), async (req, res) => {
+    try {
+        const checkQuery = 'SELECT idEquipamentos FROM equipamentos WHERE idEquipamentos = ?';
+        const check = await executePromisified(checkQuery, [id]);
+        if (!check || check.length === 0) {
+            return res.status(404).json({ success: false, message: 'Equipamento não encontrado.' });
+        }
+
+        try {
+            await executePromisified('DELETE FROM devolucao WHERE idEquipamento = ?', [id]);
+            await executePromisified('DELETE FROM agendamento WHERE idEquipamento = ?', [id]);
+        } catch (innerErr) {
+            console.warn('Aviso: não foi possível remover relacionamentos (ok se inexistente):', innerErr.message);
+        }
+
+        const deleteQuery = 'DELETE FROM equipamentos WHERE idEquipamentos = ?';
+        await executePromisified(deleteQuery, [id]);
+
+        return res.json({ success: true, message: 'Equipamento excluído com sucesso.' });
+    } catch (err) {
+        console.error('Erro ao excluir equipamento:', err);
+        if (err && err.code && (err.code === 'ER_ROW_IS_REFERENCED_' || err.code === 'ER_ROW_IS_REFERENCED')) {
+            return res.status(409).json({ success: false, message: 'Não foi possível excluir: existem registros referenciando este equipamento.' });
+        }
+        return res.status(500).json({ success: false, message: 'Erro interno ao excluir equipamento.' });
+    }
+});
+
+app.put('/equipamento/editar/:id', upload.single('novaImagemEquipamento'), async (req, res) => {
     const id = req.params.id;
-    const { novoNomeEquipamento, novaDescricao, novoAltoValor } = req.body;
+    const { novoNomeEquipamento, novaDescricao, novoAltoValor, novoFornecedor } = req.body;
     const file = req.file;
 
     try {
+        // Validação
+        if (!novoNomeEquipamento || !novaDescricao) {
+            return res.status(400).json({ success: false, message: 'Nome e descrição são obrigatórios.' });
+        }
+
+        // Buscar fornecedor atual (para não perder o valor)
+        const equipamentoExistente = await executePromisified(
+            'SELECT fornecedor FROM equipamentos WHERE idEquipamentos = ?',
+            [id]
+        );
+
+        if (equipamentoExistente.length === 0) {
+            return res.status(404).json({ success: false, message: 'Equipamento não encontrado.' });
+        }
+
+        const fornecedorAtual = novoFornecedor || equipamentoExistente[0].fornecedor;
+
+        const altoValorFinal =
+            novoAltoValor === 'on' || novoAltoValor === 'true' || novoAltoValor === '1' || novoAltoValor === 1
+                ? 1
+                : 0;
+
+        // Montar query dinamicamente
         let query = `
             UPDATE equipamentos
-            SET nomeEquipamento = ?, descricao = ?, altoValor = ?
+            SET fornecedor = ?, nomeEquipamento = ?, descricao = ?, altoValor = ?
         `;
-        const values = [novoNomeEquipamento, novaDescricao, novoAltoValor === 'on' ? 1 : 0];
+        const values = [fornecedorAtual, novoNomeEquipamento, novaDescricao, altoValorFinal];
 
         if (file) {
             query += `, tipo_mime = ?, imagemEquipamento = ?`;
@@ -481,11 +464,18 @@ app.delete('/equipamento/:id', async (req, res) => {
         query += ` WHERE idEquipamentos = ?`;
         values.push(id);
 
-        await executePromisified(query, values);
+        const result = await executePromisified(query, values);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Equipamento não encontrado.' });
+        }
+
         res.json({ success: true, message: 'Equipamento atualizado com sucesso!' });
     } catch (err) {
-        console.error('Erro ao editar equipamento:', err);
-        res.status(500).json({ success: false, message: 'Erro ao editar o equipamento.' });
+        console.error('❌ ERRO DETALHADO AO EDITAR EQUIPAMENTO:');
+        console.error('Mensagem:', err.message);
+        console.error('Código SQL:', err.code);
+        res.status(500).json({ success: false, message: 'Erro interno ao editar o equipamento.', detalhes: err.message });
     }
 });
 
