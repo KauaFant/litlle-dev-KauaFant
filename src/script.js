@@ -874,3 +874,27 @@ excluirForm?.addEventListener('submit', async (e) => {
           alert('Erro na comunicação com o servidor.');
       }
   });
+
+const userIcon = document.getElementById('user-icon');
+const userMenu = document.getElementById('user-menu');
+const daltonismoToggle = document.getElementById('daltonismo-toggle');
+
+// Exibir/esconder menu ao clicar no ícone
+userIcon?.addEventListener('click', () => {
+    userMenu.classList.toggle('hidden');
+});
+
+// Alternar modo daltonismo
+daltonismoToggle?.addEventListener('change', () => {
+    document.body.classList.toggle('daltonismo-mode', daltonismoToggle.checked);
+    localStorage.setItem('daltonismoAtivo', daltonismoToggle.checked ? 'true' : 'false');
+});
+
+// Manter preferência ao recarregar
+window.addEventListener('load', () => {
+    const saved = localStorage.getItem('daltonismoAtivo') === 'true';
+    if (saved) {
+        document.body.classList.add('daltonismo-mode');
+        if (daltonismoToggle) daltonismoToggle.checked = true;
+    }
+});

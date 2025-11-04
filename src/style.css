@@ -901,3 +901,102 @@ body {
 #product-sidebar .create-product-card {
     width: 100%;
 }
+
+.user-menu {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px 15px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
+}
+
+.user-menu.hidden {
+    display: none;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 22px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #226FC0;
+}
+
+input:checked + .slider:before {
+    transform: translateX(18px);
+}
+
+.menu-text {
+    font-size: 14px;
+    color: #16429F;
+}
+
+body.daltonismo-mode {
+    --dark-blue: #004D7A;
+    --light-blue: #66A6FF;
+    --accent-red: #FFB703;
+    --success-green: #90EE90;
+    --error-red: #FFA07A;
+    background-color: #FAFAFA;
+    color: #222;
+}
+
+body.daltonismo-mode .navbar {
+    background-color: var(--light-blue);
+}
+
+body.daltonismo-mode .nav-item.active {
+    background-color: var(--dark-blue);
+    color: #fff;
+}
+
+body.daltonismo-mode .confirm-btn {
+    background-color: var(--accent-red);
+}
+
+body.daltonismo-mode .create-product-card {
+    border-color: var(--accent-red);
+}
+
+body.daltonismo-mode h2, 
+body.daltonismo-mode .create-text {
+    color: var(--dark-blue);
+}
