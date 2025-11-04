@@ -313,6 +313,7 @@ closeAgendamentoModalBtn?.addEventListener('click', closeAgendamentoModal);
 
 agendamentoForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const formData = new FormData(agendamentoForm);
     const nomeSolicitante = formData.get('nomeSolicitante');
     const horarioAgendamento = formData.get('horarioAgendamento');
@@ -327,6 +328,25 @@ agendamentoForm?.addEventListener('submit', async (e) => {
     const dataHorarioAg_mysql = `${selectedDate} ${horarioAgendamento}:00`;
     const dataHorarioDev_mysql = `${dataDevolucao} ${horarioDevolucao}:00`;
 
+    const agora = new Date();
+    const retirada = new Date(dataHorarioAg_mysql);
+    const devolucao = new Date(dataHorarioDev_mysql);
+
+    if (retirada < agora) {
+        alert('Não é possível agendar uma retirada antes do horário atual.');
+        return;
+    }
+
+    if (devolucao < agora) {
+        alert('Não é possível definir uma devolução antes do horário atual.');
+        return;
+    }
+
+    if (devolucao <= retirada) {
+        alert('A devolução deve ser posterior à retirada.');
+        return;
+    }
+
     const agendamentoData = {
         idEquipamento: selectedEquipamentoId,
         nomeSolicitante: nomeSolicitante,
@@ -340,7 +360,9 @@ agendamentoForm?.addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(agendamentoData)
         });
+
         const result = await response.json();
+
         if (result.success) {
             alert('Agendamento realizado com sucesso!');
             agendamentoModal.classList.remove('visible');
@@ -852,4 +874,3 @@ excluirForm?.addEventListener('submit', async (e) => {
           alert('Erro na comunicação com o servidor.');
       }
   });
-  

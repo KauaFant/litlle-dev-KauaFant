@@ -168,6 +168,47 @@ app.post('/agendamento/novo', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Preencha todos os campos obrigatórios.' });
         }
 
+        const agora = new Date();
+        const retirada = new Date(dataHorarioAg);
+        const devolucao = new Date(dataHorarioDev);
+
+        if (retirada < agora) {
+            return res.status(400).json({ success: false, message: 'Não é possível agendar uma retirada antes do horário atual.' });
+        }
+
+        if (devolucao < agora) {
+            return res.status(400).json({ success: false, message: 'Não é possível definir devolução antes do horário atual.' });
+        }
+
+        if (devolucao <= retirada) {
+            return res.status(400).json({ success: false, message: 'A devolução deve ser posterior à retirada.' });
+        }
+
+        const conflitoQuery = `
+            SELECT *
+            FROM agendamento
+            WHERE idEquipamento = ?
+            AND (
+                (dataHorarioAg <= ? AND dataHorarioDev > ?) OR
+                (dataHorarioAg < ? AND dataHorarioDev >= ?) OR
+                (dataHorarioAg >= ? AND dataHorarioAg < ?)
+            )
+        `;
+        const conflitoValues = [
+            idEquipamento,
+            dataHorarioAg, dataHorarioAg,
+            dataHorarioDev, dataHorarioDev,
+            dataHorarioAg, dataHorarioDev
+        ];
+        const conflitos = await executePromisified(conflitoQuery, conflitoValues);
+
+        if (conflitos.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: '❌ Este equipamento já está agendado nesse horário. Escolha outro horário disponível.'
+            });
+        }
+
         const query = `
             INSERT INTO agendamento (idEquipamento, nomeSolicitante, dataHorarioAg, dataHorarioDev)
             VALUES (?, ?, ?, ?)
